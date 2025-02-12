@@ -1,2 +1,2 @@
 # Brainrot2.0
-Helper Tools in Python to make it easier to create brainrot.
+This will be a command-line program that makes your brainrot-video creation easier. 
