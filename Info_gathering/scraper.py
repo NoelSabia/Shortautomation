@@ -8,7 +8,7 @@ init()
 
 # This function will scrape the web for the keywords provided
 # In detail we scrape the hole website for important sublinks and then ask the user which sublinks should be scraped. We then scrape them and send this to gpt_rewrite()
-def scrape(keywords):
+def scrape(keywords: list[str]) -> str:
 	# List of websites to scrape TODO: change website accordingly
 	websites_to_scrape = ["https://techcrunch.com/"]
 	# List to store the sublinks to a specific topic
@@ -35,23 +35,22 @@ def scrape(keywords):
 
 	#List all the scraped sublinks
 	count = 0
-	print("\n")
-	for sublink in scrape_sublinks_result:
+	print("")
+	for count, sublink in enumerate(scrape_sublinks_result):
 		print(Fore.GREEN + f"{count}: {sublink}" + Style.RESET_ALL)
-		count += 1
-	print("\n")
+	print("")
 
 	# Ask the user if they which sublinks should be scraped
 	user_sublinks_result = []
 	while True:
 		try:
-			user_input = int(input(Fore.YELLOW + f"Enter the number of the sublink to scrape (0-{len(scrape_sublinks_result)-1}), or -1 to finish: " + Style.RESET_ALL))
+			user_input = int(input(f"Enter the number of the sublink to scrape (0-{len(scrape_sublinks_result)-1}), or -1 to finish: "))
 			if user_input == -1:
 				break
 			if 0 <= user_input < len(scrape_sublinks_result):
 				user_sublinks_result.append(scrape_sublinks_result[user_input])
 			else:
-				print(Fore.YELLOW + f"Please enter a number between 0 and {len(scrape_sublinks_result)-1}." + Style.RESET_ALL)
+				print(Fore.RED + f"Please enter a number between 0 and {len(scrape_sublinks_result)-1}." + Style.RESET_ALL)
 		except ValueError:
 			print(Fore.RED + "Invalid input. Please enter a number." + Style.RESET_ALL)
 
@@ -66,6 +65,11 @@ def scrape(keywords):
 				for paragraph in paragraphs:
 					scrape_text_results.append(paragraph.get_text(separator="\n", strip=True))
 	
-	# Send the scraped text to gpt_rewrite
+	# Send the scraped text to gpt_rewrite and then return the finished script
 	combined_text = "\n".join(scrape_text_results)
-	gpt_rewrite(combined_text)
+	output_path = input("\nEnter the output path for the script or press ENTER to use default value (default: ~/Documents/brainrot/infos/): ")
+	if output_path == "":
+			finished_script = gpt_rewrite(combined_text)
+	else:
+			finished_script = gpt_rewrite(combined_text, output_path)
+	return finished_script
