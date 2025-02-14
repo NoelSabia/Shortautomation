@@ -1,4 +1,4 @@
-from pytube import YouTube
+from pytube import YouTube, request
 from colorama import Fore, Style
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -10,6 +10,22 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import ssl
+import certifi
+from pytube.request import default_headers
+from yt_dlp import YoutubeDL
+
+# This is a workaround to fix the SSL certificate issue on macOS
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
+
+# If default_headers is not defined, initialize it as an empty dictionary.
+if not hasattr(request, "default_headers"):
+    request.default_headers = {}
+request.default_headers["User-Agent"] = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/92.0.4515.159 Safari/537.36"
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -101,10 +117,16 @@ def get_cc_vids(script: str, output_path: str = "~/Documents/brainrot/videos/") 
 
 	# Loop trough the vidlinks and download the videos
 	for vidlink in user_vidlinks_result:
-		yt = YouTube(vidlink)
-		video = yt.streams.filter(file_extension="mp4").first()
-		video.download(output_path=output_path)
-		print(Fore.GREEN + f"Video downloaded from {vidlink} to {output_path}" + Style.RESET_ALL)
+	    ydl_opts = {
+	        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+	        'restrictfilenames': True,
+	        'quiet': False
+	    }
+
+	    with YoutubeDL(ydl_opts) as ydl:
+	        ydl.download([vidlink])
+
+	    print(Fore.GREEN + f"Video downloaded from {vidlink} to {output_path}" + Style.RESET_ALL)
 
 # Replace the requests/BeautifulSoup scraping with Selenium:
 def get_video_links(url_to_scrape: str) -> list:
