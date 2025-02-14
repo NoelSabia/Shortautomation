@@ -39,7 +39,10 @@ class Scraper:
 
 		# Loop through the websites in parallel
 		with ThreadPoolExecutor() as executor:
-			futures = [executor.submit(self.fetch_links_, website) for website in self.targets_]
+			futures = [
+				executor.submit(self.fetch_links_, website)
+				for website in self.targets_
+			]
 			for future in as_completed(futures):
 				scrape_sublinks_result.extend(future.result())
 
