@@ -1,6 +1,7 @@
-from Info_gathering.scraper import scrape
+from info_gathering.scraper import scrape
 from colorama import Fore, Style, init
-from Voice_gathering.get_voice import get_voice
+from voice_gathering.get_voice import get_voice
+from video_gathering.get_cc_vids import get_cc_vids
 from pathlib import Path
 import shutil
 import signal
@@ -16,8 +17,15 @@ import sys
 init()
 
 def clean_up_everything() -> None:
-	print(Fore.GREEN + "\nCleaning up resources..." + Style.RESET_ALL)
-	# shutil.rmtree(Path("~/Documents/brainrot").expanduser(), ignore_errors=True)
+    print(Fore.GREEN + "\nCleaning up resources..." + Style.RESET_ALL)
+    
+    # Clean the main brainrot output directory
+    shutil.rmtree(Path("~/Documents/brainrot").expanduser(), ignore_errors=True)
+    
+    # Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
+    for folder in ["voice_gathering", "info_gathering", "video_gathering"]:
+        for pycache_dir in Path(folder).rglob("__pycache__"):
+            shutil.rmtree(pycache_dir, ignore_errors=True)
 
 # Signal handler function to catch SIGINT and SIGTERM
 def signal_handler(sig, frame):
@@ -58,6 +66,14 @@ def main() -> None:
 			get_voice(script)
 		else:
 			get_voice(script, output_path)
+	except Exception as e:
+		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+		clean_up_everything()
+		return
+	
+	# Call the get_cc_vids function
+	try:
+		get_cc_vids(script)
 	except Exception as e:
 		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 		clean_up_everything()

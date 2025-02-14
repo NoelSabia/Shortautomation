@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from Info_gathering.gpt_rewrite import gpt_rewrite
+from info_gathering.gpt_rewrite import gpt_rewrite
 from colorama import Fore, Style, init
 
 # Initialize colorama

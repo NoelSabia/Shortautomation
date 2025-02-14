@@ -55,7 +55,7 @@ def gpt_rewrite(scraped_str: str, output_path: str="~/Documents/brainrot/infos/s
 			
 		# If the user enters something else then ask again
 		elif user_input.lower() != 'n' and user_input.lower() != 'y':
-			print(Fore.YELLOW + "Invalid input. Please enter 'y' or 'n'." + Style.RESET_ALL)
+			print(Fore.YELLOW + "Invalid input. Please enter 'y' for yes, 'n' for no or 'r' for rewrite." + Style.RESET_ALL)
 	
 	# Return the rewritten text if the user didn't rewrite it themselves
 	return completion.choices[0].message.content
