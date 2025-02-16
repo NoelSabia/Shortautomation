@@ -1,31 +1,15 @@
-from pytube import YouTube, request
+import os
 from colorama import Fore, Style
 from openai import OpenAI
 from dotenv import load_dotenv
-from bs4 import BeautifulSoup
-import requests
-import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import ssl
-import certifi
-from pytube.request import default_headers
+from webdriver_manager.chrome import ChromeDriverManager
 from yt_dlp import YoutubeDL
-
-# This is a workaround to fix the SSL certificate issue on macOS
-ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
-
-# If default_headers is not defined, initialize it as an empty dictionary.
-if not hasattr(request, "default_headers"):
-    request.default_headers = {}
-request.default_headers["User-Agent"] = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/92.0.4515.159 Safari/537.36"
-)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -98,8 +82,11 @@ def get_cc_vids(script: str, output_path: str = "~/Documents/brainrot/videos/") 
 			user_input = input(f"Enter the number of the sublink to scrape (0-{len(scrape_vidlinks_result)-1}), -1 to finish or ENTER to download all: ")
 			if user_input == "":
 				# Download all videos as no specific sublink is given
-				for video in scrape_vidlinks_result:
-					user_vidlinks_result.append("https://www.youtube.com" + video)
+				for sublink in scrape_vidlinks_result:
+					if sublink.startswith("http"):
+					    user_vidlinks_result.append(sublink)
+					else:
+					    user_vidlinks_result.append("https://www.youtube.com" + sublink)
 				break
 			else:
 				num = int(user_input)
@@ -126,18 +113,19 @@ def get_cc_vids(script: str, output_path: str = "~/Documents/brainrot/videos/") 
 	    with YoutubeDL(ydl_opts) as ydl:
 	        ydl.download([vidlink])
 
-	    print(Fore.GREEN + f"Video downloaded from {vidlink} to {output_path}" + Style.RESET_ALL)
+	    print(Fore.GREEN + f"\nVideo downloaded from {vidlink} to {output_path}\n" + Style.RESET_ALL)
 
 # Replace the requests/BeautifulSoup scraping with Selenium:
 def get_video_links(url_to_scrape: str) -> list:
-    # Configure Selenium to run headless (or remove headless option for debugging)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
-    
-    # Initialize the webdriver (make sure chromedriver is installed and in PATH)
-    driver = webdriver.Chrome(options=chrome_options)
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=chrome_options
+    )
     driver.get(url_to_scrape)
     
     # Wait until elements are loaded; here we wait for at least one ytd-video-renderer to appear
@@ -167,21 +155,3 @@ def get_video_links(url_to_scrape: str) -> list:
     
     driver.quit()
     return scrape_vidlinks_result
-
-def main() -> None:
-	get_cc_vids("Der AMD Ryzen 7 7800X3D setzt neue Maßstäbe im Gaming. Dank 3D V-Cache liefert er extrem niedrige Latenzen und verbessert die FPS in CPU-intensiven Spielen erheblich. Mit 8 Kernen und 16 Threads, einer Boost-Taktung von bis zu 5,0 GHz und 96 MB L3-Cache übertrifft er sogar teurere CPUs in Gaming-Performance. Perfekt für Gamer, die das Maximum aus ihrer GPU holen wollen. Energieeffizient, kühl und unschlagbar im Preis-Leistungs-Verhältnis. Bist du bereit für Ultra-Settings und High-FPS? AMD hat geliefert. Was hältst du vom 7800X3D? Schreib’s in die Kommentare.")
-
-if __name__ == "__main__":
-	main()
-
-# This error means that when your program (via urllib/pytube) tries to establish an HTTPS connection, Python can’t verify the SSL certificate because it can’t find the proper root CA certificates. This usually happens when the local certificate store isn’t set up correctly.
-
-# To fix it on macOS, you can run the “Install Certificates.command” script that comes with the official Python installer. For example, you can run:
-
-#   open "/Applications/Python 3.9/Install Certificates.command"
-
-# Alternatively, if you're using a different Python installation or want a temporary workaround (not recommended for production), you can disable certificate verification by setting an unverified SSL context in your code:
-
-# Python
-# import ssl ssl._create_default_https_context = ssl._create_unverified_context
-# However, the proper fix is to install/update your certificates.
