@@ -1,10 +1,9 @@
-import os
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import overload
-
 from openai import OpenAI
 from dotenv import load_dotenv
 from colorama import Fore, Style
+import os
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,7 +37,7 @@ class GPTCaller:
 					{"role": "system", "content": "Sie sind ein professioneller Autor und haben die Aufgabe, den folgenden Text sachlich neu zu verfassen."},
 					{
 						"role": "user",
-						"content": "\n\n-Erstelle ein Skript auf deutsch mit ca. 150 Wörtern zu dem technischen Thema. Der Einstieg sollte eine spannende Frage oder Aussage enthalten, um die Zuschauer direkt zu fesseln. Der Text muss informativ, klar und prägnant formuliert sein. Kein überflüssiger Fülltext, sondern direkt auf den Punkt. Emojis sollen nicht verwendet werden, die Sprache jedoch alltaeglich sein. Der Text soll sachlich und informativ bleiben, ohne spekulative oder reißerische Abschlüsse."
+						"content": scraped_str + "\n\n-Erstelle ein Skript auf deutsch mit ca. 150 Wörtern zu dem technischen Thema. Der Einstieg sollte eine spannende Frage oder Aussage enthalten, um die Zuschauer direkt zu fesseln. Der Text muss informativ, klar und prägnant formuliert sein. Kein überflüssiger Fülltext, sondern direkt auf den Punkt. Emojis sollen nicht verwendet werden, die Sprache jedoch alltaeglich sein. Der Text soll sachlich und informativ bleiben, ohne spekulative oder reißerische Abschlüsse."
 					}
 				]
 			)

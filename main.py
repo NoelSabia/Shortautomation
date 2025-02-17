@@ -52,14 +52,14 @@ class Main_Organizer:
 			sleep_input = input("\nTime to sleep before cleaning up the resources (in minutes): ")
 			time_to_sleep = int(sleep_input) * 60
 			try:
-				print(Fore.GREEN + f"\nSleeping for {time_to_sleep/60:.1f} minutes before cleaning up resources..." + Style.RESET_ALL)
+				print(Fore.GREEN + f"\nSleeping for {time_to_sleep} minute(s) before cleaning up resources..." + Style.RESET_ALL)
 				time.sleep(time_to_sleep)
 			except Exception as e:
 				print(Fore.RED + f"\nError during sleep: {e}" + Style.RESET_ALL)
 		except ValueError:
 			print(Fore.RED + "\nInvalid time provided. Starting to clean up resources..." + Style.RESET_ALL)
 
-		print(Fore.GREEN + "\nCleaning up resources..." + Style.RESET_ALL)
+		print(Fore.GREEN + "\nCleaning up resources." + Style.RESET_ALL)
 		
 		# Clean the main brainrot output directory
 		shutil.rmtree(Path("~/Documents/brainrot").expanduser(), ignore_errors=True)
@@ -80,14 +80,23 @@ class Main_Organizer:
 			sys.exit(1)
 
 	# Signal handler function to catch SIGINT and SIGTERM
-	def signal_handler(self, sig, frame):
+	@staticmethod
+	def signal_handler(sig, frame):
 		"""
 		Signal handler function to catch SIGINT and SIGTERM
 		:param1: signal number
 		:param2: current stack frame
 		:return:
 		"""
-		self.clean_up_everything()
+		print(Fore.GREEN + "\nSIGINT or SIGTERM received. Cleaning up resources." + Style.RESET_ALL)
+		
+		# Clean the main brainrot output directory
+		shutil.rmtree(Path("~/Documents/brainrot").expanduser(), ignore_errors=True)
+		
+		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
+		for folder in ["voice_gathering", "info_gathering", "video_gathering"]:
+			for pycache_dir in Path(folder).rglob("__pycache__"):
+				shutil.rmtree(pycache_dir, ignore_errors=True)
 		sys.exit(0)
 
 # Register signal handlers
