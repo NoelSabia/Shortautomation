@@ -128,16 +128,16 @@ def main() -> None:
 	rewritten_script = gpt.rewrite(script)
 	main_org.check_if_error_exit(rewritten_script)
 
-	# # Call the get_voice function
-	# try:
-	# 	user_input_path = input("\nEnter the output path for the audio or press ENTER to use default value (default: ~/Documents/brainrot/voiceover/): ")
-	# 	output_path = user_input_path if user_input_path != "" else "~/Documents/brainrot/voiceover/output.mp3"
-	# 	voiceover = VoiceCaller()
-	# 	voiceover.get_voice(rewritten_script, output_path)
-	# except Exception as e:
-	# 	print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-	# 	main_org.check_if_error_exit(None)
-	# 	return
+	# Call the get_voice function
+	try:
+		user_input_path = input("\nEnter the output path for the audio or press ENTER to use default value (default: ~/Documents/brainrot/voiceover/): ")
+		output_path = user_input_path if user_input_path != "" else "~/Documents/brainrot/voiceover/output.mp3"
+		voiceover = VoiceCaller()
+		voiceover.get_voice(rewritten_script, output_path)
+	except Exception as e:
+		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+		main_org.check_if_error_exit(None)
+		return
 	
 	# Call the get_cc_vids function
 	try:
