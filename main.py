@@ -1,8 +1,8 @@
 from info_gathering.scraper import Scraper
 from info_gathering.gpt_rewrite import GPTCaller
 from colorama import Fore, Style, init
-# from voice_gathering.get_voice import get_voice
-# from video_gathering.get_cc_vids import get_cc_vids
+from voice_gathering.get_voice import VoiceCaller
+from video_gathering.get_cc_vids import VideoDownloader
 from pathlib import Path
 import shutil
 import signal
@@ -52,7 +52,7 @@ class Main_Organizer:
 			sleep_input = input("\nTime to sleep before cleaning up the resources (in minutes): ")
 			time_to_sleep = int(sleep_input) * 60
 			try:
-				print(Fore.GREEN + f"\nSleeping for {time_to_sleep} minute(s) before cleaning up resources..." + Style.RESET_ALL)
+				print(Fore.GREEN + f"\nSleeping for {sleep_input} minute(s) before cleaning up resources..." + Style.RESET_ALL)
 				time.sleep(time_to_sleep)
 			except Exception as e:
 				print(Fore.RED + f"\nError during sleep: {e}" + Style.RESET_ALL)
@@ -110,7 +110,7 @@ def main() -> None:
 	:return:
 	"""
 
-	# Create a few classes
+	# Create the main organizer object that helps to organize the main func and the scraper object that scrapes the websites
 	main_org = Main_Organizer()
 	scraper = Scraper(["https://techcrunch.com/"], main_org.get_keywords())
 
@@ -130,23 +130,25 @@ def main() -> None:
 
 	# # Call the get_voice function
 	# try:
-	# 	output_path = input("\nEnter the output path for the audio or press ENTER to use default value (default: ~/Documents/brainrot/voiceover/): ")
-	# 	if output_path == "":
-	# 		get_voice(script)
-	# 	else:
-	# 		get_voice(script, output_path)
+	# 	user_input_path = input("\nEnter the output path for the audio or press ENTER to use default value (default: ~/Documents/brainrot/voiceover/): ")
+	# 	output_path = user_input_path if user_input_path != "" else "~/Documents/brainrot/voiceover/output.mp3"
+	# 	voiceover = VoiceCaller()
+	# 	voiceover.get_voice(rewritten_script, output_path)
 	# except Exception as e:
 	# 	print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-	# 	clean_up_everything()
+	# 	main_org.check_if_error_exit(None)
 	# 	return
 	
-	# # Call the get_cc_vids function
-	# try:
-	# 	get_cc_vids(script)
-	# except Exception as e:
-	# 	print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-	# 	clean_up_everything()
-	# 	return
+	# Call the get_cc_vids function
+	try:
+		user_input_path = input("\nEnter the output path for the audio or press ENTER to use default value (default: ~/Documents/brainrot/videos/): ")
+		output_path = user_input_path if user_input_path != "" else "~/Documents/brainrot/videos/"
+		video = VideoDownloader(output_path)
+		video.get_cc_vids(rewritten_script)
+	except Exception as e:
+		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+		main_org.check_if_error_exit(None)
+		return
 	
 	# Clean up the resources
 	main_org.clean_up_everything()

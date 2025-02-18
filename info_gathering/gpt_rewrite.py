@@ -32,7 +32,7 @@ class GPTCaller:
 		while True:
 			client = OpenAI()
 			completion = client.chat.completions.create(
-				model="gpt-4o-mini",
+				model="gpt-4o-mini-2024-07-18",
 				messages=[
 					{"role": "system", "content": "Sie sind ein professioneller Autor und haben die Aufgabe, den folgenden Text sachlich neu zu verfassen."},
 					{
@@ -44,7 +44,7 @@ class GPTCaller:
 
 			# Print the generated text and ask the user if they want a rewrite
 			print(Fore.GREEN + f"\nGenerated Text:\n{completion.choices[0].message.content}\n" + Style.RESET_ALL)
-			user_input = input("Do you want a rewrite or rewrite it yourself? (y/n/r): ")
+			user_input = input("Do you want a rewrite (y/n) or rewrite it yourself(r)? (y/n/r): ")
 
 			# Check the user input if n then write the text to the file and break the loop
 			if user_input.lower() == 'n':
