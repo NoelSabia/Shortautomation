@@ -173,7 +173,7 @@ class VideoDownloader:
 		scrape_vidlinks_result = self.get_video_links(url_to_scrape)
 
 		# Show the scraped links and let the user select specific ones to download:
-		print("")  # spacing
+		print("")
 		for count, sublink in enumerate(scrape_vidlinks_result):
 			print(Fore.GREEN + f"{count}: {sublink}" + Style.RESET_ALL)
 		print("")
