@@ -15,11 +15,8 @@ from yt_dlp import YoutubeDL
 load_dotenv()
 
 class VideoDownloader:
-	def __init__(self, default_path: str | None) -> None:
-		if not default_path:
-			self._default_path = "~/Documents/brainrot/script/script.txt"
-		else:
-			self._default_path = default_path
+	def __init__(self, output_path: str) -> None:
+		self._output_path = output_path
 
 	def gather_url_params(self, script: str) -> str:
 		"""
@@ -151,7 +148,7 @@ class VideoDownloader:
 		driver.quit()
 		return scrape_vidlinks_result
 
-	def get_cc_vids(self, script: str, output_path: str = None) -> None:
+	def get_cc_vids(self, script: str) -> None:
 		"""
 		Main function to gather URL parameters, retrieve video links, prompt user selection, and download videos.
 		:param1: The script to generate URL parameters from.

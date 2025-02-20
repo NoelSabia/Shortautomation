@@ -9,8 +9,9 @@ from colorama import Fore, Style
 load_dotenv()
 
 class VoiceCaller:
-	def __init__(self) -> None:
-		pass
+	def __init__(self, script_to_voice: str, output_path: str) -> None:
+		self._script_to_voice = script_to_voice
+		self._output_path = output_path
 	
 	def cut_silence(self, input_path: str, output_path: str) -> None:
 		"""
@@ -32,11 +33,7 @@ class VoiceCaller:
 		print(f"Silence removed: {input_path} -> {output_path}")
 
 	# This function will convert the text to speech using the Eleven Labs API
-	def get_voice(self, str_to_voice: str, output_path: str) -> None:
-
-		#Check if output_path is None or an empty string
-		if output_path == "" or output_path == None:
-			output_path = "~/Documents/brainrot/voiceover/output.mp3"
+	def get_voice(self) -> None:
 
 		# Cycle through all API keys and check for validity
 		api_keys = [os.getenv('ELEVEN_LABS_API_1'), os.getenv('ELEVEN_LABS_API_2'), os.getenv('ELEVEN_LABS_API_2'), os.getenv('ELEVEN_LABS_API_4')]
@@ -52,16 +49,16 @@ class VoiceCaller:
 				audio_generator = client.text_to_speech.convert(
 					voice_id= "JBFqnCBsd6RMkjVDRZzb", # this is the voice of George
 					output_format="mp3_44100_128",
-					text=str_to_voice,
+					text=self._script_to_voice,
 					model_id="eleven_multilingual_v2",
 					voice_settings={"stability": 1.0, "similarity_boost": 0.25, "style": 0.1}
 				)
 				# Save the audio content to a file
-				expanded_output_path = os.path.expanduser(output_path)
+				expanded_output_path = os.path.expanduser(self._output_path)
 				with open(expanded_output_path, 'wb') as audio_file:
 					for chunk in audio_generator:
 						audio_file.write(chunk)
-				print(Fore.GREEN + f"Audio saved to {output_path} using API key: {api_key}" + Style.RESET_ALL)
+				print(Fore.GREEN + f"Audio saved to {self._output_path} using API key: {api_key}" + Style.RESET_ALL)
 				break
 			except Exception as e:
 				if e.status_code == 429:
@@ -83,12 +80,12 @@ class VoiceCaller:
 
 
 		# call to remove the silence from the audio file
-		cleaned_output_path = input("\nEnter the path to save the cleaned audio file or ENTER to go with the default (~/Documents/brainrot/voiceover/cleaned_output.mp3): ") or "~/Documents/brainrot/voiceover/cleaned_output.mp3"
-		expanded_output_path = os.path.expanduser(output_path)
+		cleaned_output_path = input("\nEnter the path to save the cleaned audio file or ENTER to go with the default (~/Documents/brainrot/voiceover/cleaned_output.mp3): ") or self._output_path + "/voiceover/cleaned_output.mp3"
+		expanded_output_path = os.path.expanduser(self._output_path)
 		expanded_cleaned_output_path = os.path.expanduser(cleaned_output_path)
 		self.cut_silence(expanded_output_path, expanded_cleaned_output_path)
 
 		# After successfully processing and creating the cleaned file:
 		if os.path.exists(expanded_output_path):
-			os.remove(output_path)
-			print(f"\nDeleted original file: {output_path}")
+			os.remove(self._output_path)
+			print(f"\nDeleted original file: {self._output_path}")

@@ -9,24 +9,20 @@ import os
 load_dotenv()
 
 class GPTCaller:
-	def __init__(self, default_path: str | None) -> None:
-		if not default_path:
-			self._default_path = "~/Documents/brainrot/script/script.txt"
-		else:
-			self._default_path = default_path
+	def __init__(self, default_path: str) -> None:
+		self._default_path = default_path
 		self._rewritten_text = None
 			
 
-	def rewrite(self, scraped_str: str, output_path: str = None) -> str:
+	def rewrite(self, scraped_str: str) -> str:
 		"""
 		Rewrite the scraped text so that you can use it as your script
 		:param scraped_str: The scraped text
 		:param output_path: The path to save the rewritten text
 		:return:
 		"""
-		if output_path is None or output_path == "":
-			output_path = self._default_path
-		expanded_output_path = os.path.expanduser(output_path)
+		# Expand the path to the user's home directory here to avoid expanding it multiple times in the loop
+		expanded_output_path = os.path.expanduser(self._default_path)
 
 		# Loop to ask the user if they want a rewrite
 		while True:
@@ -68,21 +64,3 @@ class GPTCaller:
 
 		# Return the rewritten text if the user didn't rewrite it themselves
 		return completion.choices[0].message.content
-
-	# def rewrite_multiple(self, scraped_strs: list[str], output_paths: list[str] = None) -> list[str]:
-	# 	"""
-	# 	Rewrite multiple scraped texts in parallel
-	# 	:param scraped_strs:
-	# 	:param output_paths:
-	# 	:return:
-	# 	"""
-	# 	if len(scraped_strs) != len(output_paths):
-	# 		raise ValueError("The length of scraped_strs and output_paths should be the same.")
-	# 	elif len(set(output_paths)) != len(output_paths):
-	# 		raise ValueError("Output paths must be unique.")
-	# 	with ThreadPoolExecutor() as executor:
-	# 		futures = [
-	# 			executor.submit(self.rewrite, scraped_str, output_path) \
-	# 			for scraped_str, output_path in zip(scraped_strs, output_paths)
-	# 		]
-	# 		return [future.result() for future in futures]

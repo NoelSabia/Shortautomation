@@ -49,7 +49,7 @@ A command-line program that streamlines creating short, “brainrot” videos.
    ELEVEN_LABS_API_X=your_elevenlabs_key
    ```
 > [!TIP]
-> You can use a 10-min-mail to create endless free eleven labs api-keys. 
+> You can use a 10-min-mail to create endless free eleven labs api-keys. The more the better.
 
 ---
 
@@ -60,6 +60,8 @@ A command-line program that streamlines creating short, “brainrot” videos.
    python3 main.py
    ```
 3. Follow the prompts.
+> [!WARNING]
+> Using different websites than the default websites could result in bad results!
 
 ## How to Use the Master Command-Line Program
 1. Activate your virtual environment.  
