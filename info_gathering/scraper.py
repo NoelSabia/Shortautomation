@@ -108,13 +108,26 @@ class Scraper:
         :param sublink: URL of the sublink to fetch
         :return: List of paragraphs' text
         """
-		paragraphs_text = []
-		raw_html = requests.get(sublink)
-		if raw_html.status_code == 200:
-			soup = BeautifulSoup(raw_html.text, 'html.parser')
-			main_content = soup.find('main')					#TODO: the main tag might only be specific to techcrunch! change accordingly
-			if main_content:
-				paragraphs = main_content.find_all('p')
+		if sublink == "https://techcrunch.com/":
+			paragraphs_text = []
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				soup = BeautifulSoup(raw_html.text, 'html.parser')
+				main_content = soup.find('main')
+				if main_content:
+					paragraphs = main_content.find_all('p')
+					for paragraph in paragraphs:
+						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+			return paragraphs_text
+		else:
+			paragraphs_text = []
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				soup = BeautifulSoup(raw_html.text, 'html.parser')
+				# You could scrape a variety of elements; here we collect all <p> tags
+				paragraphs = soup.find_all('p')
 				for paragraph in paragraphs:
-					paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
-		return paragraphs_text
+					text = paragraph.get_text(separator="\n", strip=True)
+					if text:
+						paragraphs_text.append(text)
+			return paragraphs_text

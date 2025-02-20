@@ -26,7 +26,7 @@ class Main_Organizer:
 	
 	def get_keywords(self) -> None:
 		# Ask the user for the keywords
-		keywords = input("Enter topic related keywords: ").lower()
+		keywords = input("\nEnter topic related keywords: ").lower()
 		splitted_keywords = keywords.split(" ")
 		return splitted_keywords
 	

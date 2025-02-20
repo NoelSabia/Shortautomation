@@ -1,2 +1,6 @@
 dir="~/Documents/test1/"
 website="https://techcrunch.com/"
+
+dir="~/Documents/test2/"
+website="test.com"
+

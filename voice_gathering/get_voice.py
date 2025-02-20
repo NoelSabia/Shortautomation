@@ -29,8 +29,8 @@ class VoiceCaller:
 		try:
 			subprocess.run(command, check=True)
 		except subprocess.CalledProcessError as e:
-			print(f"Failed to remove silence from {input_path}.")
-		print(f"Silence removed: {input_path} -> {output_path}")
+			print(f"\nFailed to remove silence from {input_path}.")
+		print(f"\nSilence removed: {input_path} -> {output_path}")
 
 	# This function will convert the text to speech using the Eleven Labs API
 	def get_voice(self) -> None:
@@ -58,7 +58,7 @@ class VoiceCaller:
 				with open(expanded_output_path, 'wb') as audio_file:
 					for chunk in audio_generator:
 						audio_file.write(chunk)
-				print(Fore.GREEN + f"Audio saved to {self._output_path} using API key: {api_key}" + Style.RESET_ALL)
+				print(Fore.GREEN + f"\nAudio saved to {self._output_path} using API key: {api_key}" + Style.RESET_ALL)
 				break
 			except Exception as e:
 				if e.status_code == 429:
@@ -80,7 +80,8 @@ class VoiceCaller:
 
 
 		# call to remove the silence from the audio file
-		cleaned_output_path = input("\nEnter the path to save the cleaned audio file or ENTER to go with the default (~/Documents/brainrot/voiceover/cleaned_output.mp3): ") or self._output_path + "/voiceover/cleaned_output.mp3"
+		default_cleaned_path = os.path.join(os.path.dirname(self._output_path), "cleaned_output.mp3")
+		cleaned_output_path = input(f"\nEnter the path to save the cleaned audio file or ENTER to go with the default ({default_cleaned_path}): ") or default_cleaned_path
 		expanded_output_path = os.path.expanduser(self._output_path)
 		expanded_cleaned_output_path = os.path.expanduser(cleaned_output_path)
 		self.cut_silence(expanded_output_path, expanded_cleaned_output_path)
