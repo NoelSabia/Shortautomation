@@ -1,4 +1,4 @@
-# Brainrot2.0
+# Shortautomation
 
 A command-line program that streamlines creating short, “brainrot” videos.
 
