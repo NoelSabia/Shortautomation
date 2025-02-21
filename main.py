@@ -5,7 +5,6 @@ from voice_gathering.get_voice import VoiceCaller
 from video_gathering.get_cc_vids import VideoDownloader
 from pathlib import Path
 import shutil
-import signal
 import sys
 import time
 
@@ -143,10 +142,6 @@ def main() -> None:
 		return "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..."
 	main_org = Main_Organizer(sys.argv[1], sys.argv[2:])
 	
-	# Register signal handlers
-	signal.signal(signal.SIGINT, Main_Organizer.signal_handler)
-	signal.signal(signal.SIGTERM, Main_Organizer.signal_handler)
-
 	# Call the create_folders function
 	main_org.create_folders()
 

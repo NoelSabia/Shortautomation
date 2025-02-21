@@ -10,6 +10,7 @@ A command-line program that streamlines creating short, “brainrot” videos.
   - [API Keys and How to Get Them](#api-keys-and-how-to-get-them)
 - [How to Use This Command-Line Program](#how-to-use-this-command-line-program)
 - [How to Use the Master Command-Line Program](#how-to-use-the-master-command-line-program)
+   - [How to change the program args file accordingly](#how-to-change-the-program-args-file-accordingly)
 
 ---
 
@@ -54,22 +55,27 @@ A command-line program that streamlines creating short, “brainrot” videos.
 ---
 
 ## How to Use This Command-Line Program
-1. Activate your virtual environment.  
+1. Activate your virtual environment.
 2. Run Python scripts from the terminal, for example:  
    ```bash
-   python3 main.py
+   python3 main.py <directory of where to write the output> <from here on only args are websites to scrape> ...
    ```
 3. Follow the prompts.
-> [!WARNING]
-> Using different websites than the default websites could result in bad results!
+
 
 ## How to Use the Master Command-Line Program
-1. Activate your virtual environment.  
-2. Run Python scripts from the terminal, for example:  
+1. Activate your virtual environment.
+2. Change the file program_args.txt [accordingly](#how-to-change-the-program-args-file-accordingly) or leave the default values.
+3. Run Python scripts from the terminal, for example:  
    ```bash
    python3 master.py
    ```
-3. Follow the prompts.
+4. Follow the prompts.
+
+### How to change the program args file accordingly
+The program_args.txt file has blocks that will have one directory of where to save all the output and as many websites to scrape as you want.
+The only problem is that if you don't use the default websites you either have to write your own python code to scrape or use the default scraper.
+Though the default scraper might be useless or deliver very poorly!
 
 > [!NOTE]
 > You will only need the master command-line program if you want to create multiple videos in one go.

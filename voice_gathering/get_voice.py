@@ -88,5 +88,5 @@ class VoiceCaller:
 
 		# After successfully processing and creating the cleaned file:
 		if os.path.exists(expanded_output_path):
-			os.remove(self._output_path)
-			print(f"\nDeleted original file: {self._output_path}")
+			os.remove(expanded_output_path)
+			print(Fore.GREEN + f"\nDeleted original file: {expanded_output_path}" + Style.RESET_ALL)
