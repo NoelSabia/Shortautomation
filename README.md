@@ -35,7 +35,7 @@ A command-line program that streamlines creating short, “brainrot” videos.
 1. Ensure you’re in the virtual environment.  
 2. Install dependencies with:  
    ```bash
-   pip install <package>
+   pip install colorama openai dotenv requests bs4 selenium webdriver_manager yt-dlp ffmpeg-python elevenlabs google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
    ```
 3. Alternative you can use a requirements file and just add all the packages in there and install all of them at once with:
    ```bash
