@@ -62,7 +62,7 @@ class VoiceCaller:
 				break
 			except Exception as e:
 				if e.status_code == 429:
-					print(Fore.YELLOW + f"\nAPI key {api_key} exhausted (429). Trying next key." + Style.RESET_ALL)
+					print(Fore.YELLOW + f"\nAPI key limit exceeded for {api_key} (429). Trying next key." + Style.RESET_ALL)
 					failed_api_keys += 1
 					continue
 				elif e.status_code == 401:

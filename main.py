@@ -3,6 +3,7 @@ from info_gathering.gpt_rewrite import GPTCaller
 from colorama import Fore, Style, init
 from voice_gathering.get_voice import VoiceCaller
 from video_gathering.get_cc_vids import VideoDownloader
+from shorts_fusion.capcut_merger import CapCutOrganizer
 from pathlib import Path
 import shutil
 import sys
@@ -19,8 +20,9 @@ init()
 
 # This class will be used to organize the brainrot project and will only be used for cleaning, organizing and managing the project not storing any data
 class Main_Organizer:
-	def __init__(self, path: str, websites_to_scrape: list[str]) -> None:
+	def __init__(self, path: str, browser: str, websites_to_scrape: list[str]) -> None:
 		self._path = path
+		self._browser = browser
 		self._websites_to_scrape = websites_to_scrape
 	
 	def get_keywords(self) -> None:
@@ -136,45 +138,58 @@ def main() -> None:
 	Main function to run the brainrot project
 	:return:
 	"""
-	#read the args and safe them in the main organizer object. Create the main organizer object that helps to organize the main func. 
-	args = sys.argv[1:]
-	if len(args) < 2:
-		return "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..."
-	main_org = Main_Organizer(sys.argv[1], sys.argv[2:])
-	
-	# Call the create_folders function
-	main_org.create_folders()
-
-	# Create the scraper object that scrapes the websites. Then call the scrape function and check for return value
-	scraper = Scraper(main_org._websites_to_scrape, main_org.get_keywords())
-	script = scraper.scrape()
-	main_org.check_if_error_exit(script)
-	
-	# Call the gpt_rewrite function and check for return value
-	gpt = GPTCaller(main_org._path + "/script/script.txt")
-	rewritten_script = gpt.rewrite(script)
-	main_org.check_if_error_exit(rewritten_script)
-
-	# Call the get_voice function
 	try:
-		voiceover = VoiceCaller(rewritten_script, main_org._path + "/voiceover/output.mp3")
-		voiceover.get_voice()
-	except Exception as e:
-		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-		main_org.check_if_error_exit(None)
-		return
-	
-	# Call the get_cc_vids function
-	try:
-		video = VideoDownloader(main_org._path + "/video/output.mp3")
-		video.get_cc_vids(rewritten_script)
-	except Exception as e:
-		print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-		main_org.check_if_error_exit(None)
-		return
-	
-	# Clean up the resources
-	main_org.clean_up_everything()
+		#read the args and safe them in the main organizer object. Create the main organizer object that helps to organize the main func. 
+		args = sys.argv[1:]
+		if len(args) < 2:
+			return "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..."
+		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[3:])
+		
+		# Call the create_folders function
+		main_org.create_folders()
+
+		# Create the scraper object that scrapes the websites. Then call the scrape function and check for return value
+		scraper = Scraper(main_org._websites_to_scrape, main_org.get_keywords())
+		script = scraper.scrape()
+		main_org.check_if_error_exit(script)
+		
+		# Call the gpt_rewrite function and check for return value
+		gpt = GPTCaller(main_org._path + "/script/script.txt")
+		rewritten_script = gpt.rewrite(script)
+		main_org.check_if_error_exit(rewritten_script)
+
+		# Call the get_voice function
+		try:
+			voiceover = VoiceCaller(rewritten_script, main_org._path + "/voiceover/output.mp3")
+			voiceover.get_voice()
+		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
+		
+		# Call the get_cc_vids function
+		try:
+			video = VideoDownloader(main_org._path + "/video/output.mp3")
+			video.get_cc_vids(rewritten_script)
+		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
+		
+		# Call the capcut_merger function (if full autiomation with videos are doable this will be deprecated)
+		try:
+			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser, rewritten_script)
+			merger.orchastrate_fusion()
+		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
+		
+		# Clean up the resources
+		main_org.clean_up_everything()
+
+	except KeyboardInterrupt:
+		pass
 	
 # Call the main function
 if __name__ == "__main__":

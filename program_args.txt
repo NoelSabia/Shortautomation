@@ -1,6 +1,8 @@
 dir="~/Documents/test1"
+browser="firefox"
 website="https://techcrunch.com/"
 
 dir="~/Documents/test2"
+browser="firefox"
 website="test.com"
 
