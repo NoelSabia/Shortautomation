@@ -1,13 +1,27 @@
-import subprocess
-from colorama import Fore, Style
 import os
 import time
+import subprocess
+from colorama import Fore, Style
 from pathlib import Path
+from openai import OpenAI
+import google_auth_httplib2
+import google_auth_oauthlib
+import googleapiclient.discovery
+import googleapiclient.errors
+import googleapiclient.http
+from dotenv import load_dotenv
+
+#load the env variabled
+load_dotenv()
+
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+TOKEN_FILE = 'token.json'
 
 class CapCutOrganizer:
-    def __init__(self, output_path: str, browser: str) -> None:
+    def __init__(self, output_path: str, browser: str, script: str) -> None:
         self._browser = browser
         self._output_path = output_path
+        self._script = script
 
     def open_browser(self) -> None:
         """
@@ -48,11 +62,65 @@ class CapCutOrganizer:
         except KeyboardInterrupt:
             print(Fore.YELLOW + "\nStopped watching Downloads folder" + Style.RESET_ALL)
 
+    def authenticate_youtube(self):
+        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+            "./yt-api-requirements/client.json",
+            scopes=["https://www.googleapis.com/auth/youtube.upload"]
+        )
+        flow.redirect_uri = "http://localhost:8080/"
+        credentials = flow.run_local_server(port=8080)
+        return googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
+
+    def upload_video(self, youtube) -> None:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini-2024-07-18",
+            messages=[
+                {"role": "system", "content": "Sie sind ein professioneller Autor und haben die Aufgabe, den folgenden Text sachlich neu zu verfassen."},
+                {
+                    "role": "user",
+                    "content": self._script + "\n\n-Fasse das Skript in eine interessante Überschrift zusammen. Der Text sollte nicht laenger als 10 Wörter sein."
+                }
+            ]
+        )
+        request_body = {
+            "snippet": {
+                "categoryId": "24",
+                "title": completion.choices[0].message.content,
+                "description": "", # here you could give credit for the videos used under cc license
+                "tags": ["short"]
+            },
+            "status":{
+                "privacyStatus": "private"
+            }
+        }
+        #use "publishAt": "2023-12-31T12:00:00Z" to schedule the video. use it directly! under the privacyStatus in status
+
+        # put the path of the video that you want to upload
+        media_file = os.path.join(Path(self._output_path).expanduser(), "output.mp4")
+
+        # Create a request for the API
+        request = youtube.videos().insert(
+            part="snippet,status",
+            body=request_body,
+            media_body=googleapiclient.http.MediaFileUpload(media_file, chunksize=-1, resumable=True)
+        )
+
+        # Upload the video
+        response = None 
+        while response is None:
+            status, response = request.next_chunk()
+            if status:
+                print(f"\nUpload {int(status.progress()*100)}%")
+            print(f"\nVideo uploaded with ID: {response['id']}")
+
     def upload_to_youtube(self) -> None:
         """
         Upload the output files to YouTube.
         """
         print(Fore.GREEN + f"\nUploading output files to YouTube" + Style.RESET_ALL)
+        youtube = self.authenticate_youtube()
+        self.upload_video(youtube)
     
     def orchastrate_fusion(self) -> None:
         """
@@ -64,8 +132,8 @@ class CapCutOrganizer:
         self.upload_to_youtube()
 
 def main() -> None:
-    merger = CapCutOrganizer("~/Documents/brainrot/upload", "firefox")
-    merger.orchastrate_fusion()
+    merger = CapCutOrganizer("~/Documents/brainrot/upload", "/Applications/Firefox.app/Contents/MacOS/firefox", "Du willst wissen, was die Zukunft bringt? Hier sind die heißesten Tech-News in 60 Sekunden! Künstliche Intelligenz wird immer smarter – Google, Apple und Co. bringen neue KI-Features, die unseren Alltag revolutionieren. Faltbare Handys sind auf dem Vormarsch. Samsung und andere Hersteller zeigen, dass die Zukunft flexibel ist. Neue Akkus laden in unter 10 Minuten. Nie wieder stundenlang warten. Welche Tech-Innovation interessiert dich am meisten? Schreib es in die Kommentare. Für mehr Tech-Updates abonnieren und liken.")
+    merger.upload_to_youtube()
 
 if __name__ == "__main__":
     main()

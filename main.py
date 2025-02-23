@@ -178,7 +178,7 @@ def main() -> None:
 		
 		# Call the capcut_merger function (if full autiomation with videos are doable this will be deprecated)
 		try:
-			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser)
+			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser, rewritten_script)
 			merger.orchastrate_fusion()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
