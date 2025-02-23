@@ -3,6 +3,7 @@ from info_gathering.gpt_rewrite import GPTCaller
 from colorama import Fore, Style, init
 from voice_gathering.get_voice import VoiceCaller
 from video_gathering.get_cc_vids import VideoDownloader
+from shorts_fusion.capcut_merger import CapCutOrganizer
 from pathlib import Path
 import shutil
 import sys
@@ -170,6 +171,15 @@ def main() -> None:
 		try:
 			video = VideoDownloader(main_org._path + "/video/output.mp3")
 			video.get_cc_vids(rewritten_script)
+		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
+		
+		# Call the capcut_merger function (if full autiomation with videos are doable this will be deprecated)
+		try:
+			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser)
+			merger.orchastrate_fusion()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
