@@ -4,6 +4,7 @@ from colorama import Fore, Style, init
 from voice_gathering.get_voice import VoiceCaller
 from video_gathering.get_cc_vids import VideoDownloader
 from shorts_fusion.capcut_merger import CapCutOrganizer
+from music_selection.selection import MusicSelection
 from pathlib import Path
 import shutil
 import sys
@@ -158,10 +159,12 @@ def main() -> None:
 		rewritten_script = gpt.rewrite(script)
 		main_org.check_if_error_exit(rewritten_script)
 
-		# Call the get_voice function
+		# Call the get_voice function and call the get_song function for all the audio related stuff
 		try:
 			voiceover = VoiceCaller(rewritten_script, main_org._path + "/voiceover/output.mp3")
 			voiceover.get_voice()
+			music = MusicSelection(main_org._path + "/voiceover")
+			music.get_song()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
