@@ -126,7 +126,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "video_gathering"]:
+		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 		sys.exit(0)

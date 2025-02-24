@@ -130,10 +130,3 @@ class CapCutOrganizer:
         self.open_browser()
         self.mv_capcut_output_to_upload()
         self.upload_to_youtube()
-
-def main() -> None:
-    merger = CapCutOrganizer("~/Documents/brainrot/upload", "/Applications/Firefox.app/Contents/MacOS/firefox", "Du willst wissen, was die Zukunft bringt? Hier sind die heißesten Tech-News in 60 Sekunden! Künstliche Intelligenz wird immer smarter – Google, Apple und Co. bringen neue KI-Features, die unseren Alltag revolutionieren. Faltbare Handys sind auf dem Vormarsch. Samsung und andere Hersteller zeigen, dass die Zukunft flexibel ist. Neue Akkus laden in unter 10 Minuten. Nie wieder stundenlang warten. Welche Tech-Innovation interessiert dich am meisten? Schreib es in die Kommentare. Für mehr Tech-Updates abonnieren und liken.")
-    merger.upload_to_youtube()
-
-if __name__ == "__main__":
-    main()

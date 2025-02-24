@@ -35,7 +35,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 
 ### How and What to Install via pip
 1. Ensure you’re in the virtual environment.  
-2. Install dependencies with:  
+2. Install dependencies and ffmpeg on your system:  
    ```bash
    pip install colorama openai dotenv requests bs4 selenium webdriver_manager yt-dlp ffmpeg-python elevenlabs google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
    ```
