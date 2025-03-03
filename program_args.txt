@@ -5,4 +5,3 @@ website="https://techcrunch.com/"
 dir="~/Documents/test2"
 browser="chromium"
 website="test.com"
-

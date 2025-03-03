@@ -2,7 +2,7 @@ from info_gathering.scraper import Scraper
 from info_gathering.gpt_rewrite import GPTCaller
 from colorama import Fore, Style, init
 from voice_gathering.get_voice import VoiceCaller
-from video_gathering.get_cc_vids import VideoDownloader
+from visuals_gathering.get_visuals import VideoDownloader
 from shorts_fusion.capcut_merger import CapCutOrganizer
 from music_selection.selection import MusicSelection
 from pathlib import Path
@@ -34,13 +34,17 @@ class Main_Organizer:
 	
 	def create_folders(self) -> None:
 		"""
-		Create folders for the output files called brainrot/voiceover, brianrot/videos, brainrot/infos.
+		Create folders for the output files.
 		:return:
 		"""
-		print(Fore.GREEN + f"\nCreate folders for the output files called {self._path}/voiceover, {self._path}/videos, {self._path}/script and {self._path}/upload" + Style.RESET_ALL)
+		print(Fore.GREEN + f"\nCreate folders for the output files called {self._path}/voiceover, {self._path}/visuals, {self._path}/visuals/images, {self._path}/visuals/videos {self._path}/script and {self._path}/upload" + Style.RESET_ALL)
 		directory = Path(f"{self._path}/voiceover").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
-		directory = Path(f"{self._path}/videos").expanduser()
+		directory = Path(f"{self._path}/visuals").expanduser()
+		directory.mkdir(parents=True, exist_ok=True)
+		directory = Path(f"{self._path}/visuals/images").expanduser()
+		directory.mkdir(parents=True, exist_ok=True)
+		directory = Path(f"{self._path}/visuals/videos").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/script").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
@@ -99,7 +103,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 		
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion", "music_selection"]:
+		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 	
@@ -173,8 +177,8 @@ def main() -> None:
 		
 		# Call the get_cc_vids function
 		try:
-			video = VideoDownloader(main_org._path + "/video/output.mp3")
-			video.get_cc_vids(rewritten_script)
+			visual = VideoDownloader(main_org._path + "/visuals", rewritten_script)
+			visual.download_visuals()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
