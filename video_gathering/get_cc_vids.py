@@ -155,9 +155,7 @@ class VideoDownloader:
 		:param2: The output path to save the videos to.
 		:return:
 		"""
-		if output_path is None or output_path == "":
-			output_path = self._default_path
-		expanded_output_path = os.path.expanduser(output_path)
+		expanded_output_path = os.path.expanduser(self._output_path)
 
 		# Gather user-chosen URL parameters:
 		url_params = self.gather_url_params(script)
@@ -179,3 +177,12 @@ class VideoDownloader:
 		# Expand and download videos:
 		output_path = os.path.expanduser(output_path)
 		self.download_videos(user_vidlinks_result, output_path)
+
+
+# def main() -> None:
+# 	video = VideoDownloader(output_path="~/Downloads/brainrot/video")
+# 	script = "Haben Sie sich jemals gefragt, wie Künstliche Intelligenz in die Welt der Videoproduktion vordringt? OpenAI hat kürzlich seinen Video-Generierungsmodell Sora für Nutzer in der EU, dem Vereinigten Königreich sowie in Norwegen, Liechtenstein und Island zugänglich gemacht. Bereits im Februar 2024 eingeführt, konnten nur Abonnenten des ChatGPT Plus und Pro-Programms im Dezember darauf zugreifen. Sora ermöglicht die Erstellung von bis zu 20 Sekunden langen videografischen Clips und soll in Zukunft direkt in die ChatGPT-App integriert werden. Das Ziel von OpenAI ist es, die Anwendung von Sora über kreative Studios hinaus zu erweitern. Außerdem wird an einer mobilen Version gearbeitet und die Möglichkeit erforscht, Sora für die Generierung von Bildern zu nutzen. Damit zeigt OpenAI, wie KI die kreative Landschaft neu gestalten kann, und bietet spannende Perspektiven für die Zukunft der Medienproduktion."
+# 	video.get_cc_vids(script)
+
+# if __name__ == "__main__":
+# 	main()

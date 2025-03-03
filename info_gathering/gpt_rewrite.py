@@ -30,10 +30,10 @@ class GPTCaller:
 			completion = client.chat.completions.create(
 				model="gpt-4o-mini-2024-07-18",
 				messages=[
-					{"role": "system", "content": "Sie sind ein professioneller Autor und haben die Aufgabe, den folgenden Text sachlich neu zu verfassen."},
+					{"role": "system", "content": "Du bist ein professioneller Autor und haben die Aufgabe, den folgenden Text sachlich neu zu verfassen."},
 					{
 						"role": "user",
-						"content": scraped_str + "\n\n-Erstelle ein Skript auf deutsch mit ca. 150 Wörtern zu dem technischen Thema. Der Einstieg sollte eine spannende Frage oder Aussage enthalten, um die Zuschauer direkt zu fesseln. Der Text muss informativ, klar und prägnant formuliert sein. Kein überflüssiger Fülltext, sondern direkt auf den Punkt. Emojis sollen nicht verwendet werden, die Sprache jedoch alltaeglich sein. Der Text soll sachlich und informativ bleiben, ohne spekulative oder reißerische Abschlüsse."
+						"content": scraped_str + "\n\n-Erstelle ein Skript auf deutsch mit ca. 150 Wörtern zu dem technischen Thema. Der Einstieg sollte eine spannende Frage oder Aussage enthalten, um die Zuschauer direkt zu fesseln. Der Text muss informativ, klar und prägnant formuliert sein und sollte den Zuschauer mit 'Du'ansprechen. Kein überflüssiger Fülltext, sondern direkt auf den Punkt. Emojis sollen nicht verwendet werden, die Sprache jedoch alltaeglich sein. Der Text soll sachlich und informativ bleiben, ohne spekulative oder reißerische Abschlüsse."
 					}
 				]
 			)

@@ -1,8 +1,8 @@
 dir="~/Documents/test1"
-browser="firefox"
+browser="chromium"
 website="https://techcrunch.com/"
 
 dir="~/Documents/test2"
-browser="firefox"
+browser="chromium"
 website="test.com"
 

@@ -99,7 +99,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 		
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "video_gathering"]:
+		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion", "music_selection"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 	
@@ -127,7 +127,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion"]:
+		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion", "music_selection"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 		sys.exit(0)
@@ -143,7 +143,8 @@ def main() -> None:
 		#read the args and safe them in the main organizer object. Create the main organizer object that helps to organize the main func. 
 		args = sys.argv[1:]
 		if len(args) < 2:
-			return "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..."
+			print(Fore.RED + "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..." + Style.RESET_ALL)
+			return
 		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[3:])
 		
 		# Call the create_folders function
