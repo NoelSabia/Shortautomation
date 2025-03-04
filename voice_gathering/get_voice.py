@@ -35,7 +35,7 @@ class VoiceCaller:
 	def get_voice(self) -> None:
 
 		# Cycle through all API keys and check for validity
-		api_keys = [os.getenv('ELEVEN_LABS_API_1'), os.getenv('ELEVEN_LABS_API_2'), os.getenv('ELEVEN_LABS_API_2'), os.getenv('ELEVEN_LABS_API_4'), os.getenv('ELEVEN_LABS_API_5')]
+		api_keys = [os.getenv('ELEVEN_LABS_API_1'), os.getenv('ELEVEN_LABS_API_2'), os.getenv('ELEVEN_LABS_API_3'), os.getenv('ELEVEN_LABS_API_4'), os.getenv('ELEVEN_LABS_API_5')]
 		valid_api_keys = [key for key in api_keys if key]
 		if not valid_api_keys:
 			raise ValueError(Fore.RED + "Eleven Labs API key not found. Please set the ELEVEN_LABS_API_X environment variables." + Style.RESET_ALL)

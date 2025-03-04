@@ -81,7 +81,7 @@ class MasterOrganizer:
 				print(Fore.RED + f"\nInsufficient permissions to delete: {directory}" + Style.RESET_ALL)
 
 		# Remove __pycache__ directories
-		for folder in ["voice_gathering", "info_gathering", "video_gathering", "shorts_fusion", "music_selection"]:
+		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 

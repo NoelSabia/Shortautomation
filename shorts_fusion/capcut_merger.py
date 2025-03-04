@@ -60,11 +60,11 @@ class CapCutOrganizer:
                             print(Fore.RED + f"Error moving file: {e}" + Style.RESET_ALL)
                 time.sleep(1)
         except KeyboardInterrupt:
-            print(Fore.YELLOW + "\nStopped watching Downloads folder" + Style.RESET_ALL)
+            print(Fore.YELLOW + "\n\nStopped watching Downloads folder" + Style.RESET_ALL)
 
     def authenticate_youtube(self):
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            "./yt-api-requirements/client.json",
+            "client.json",
             scopes=["https://www.googleapis.com/auth/youtube.upload"]
         )
         flow.redirect_uri = "http://localhost:8080/"
