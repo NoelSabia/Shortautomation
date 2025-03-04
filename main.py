@@ -37,8 +37,8 @@ class Main_Organizer:
 		Create folders for the output files.
 		:return:
 		"""
-		print(Fore.GREEN + f"\nCreate folders for the output files called {self._path}/voiceover, {self._path}/visuals, {self._path}/visuals/images, {self._path}/visuals/videos {self._path}/script and {self._path}/upload" + Style.RESET_ALL)
-		directory = Path(f"{self._path}/voiceover").expanduser()
+		print(Fore.GREEN + f"\nCreate folders for the output files called {self._path}/audio, {self._path}/visuals, {self._path}/visuals/images, {self._path}/visuals/videos {self._path}/script and {self._path}/upload" + Style.RESET_ALL)
+		directory = Path(f"{self._path}/audio").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/visuals").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
@@ -166,9 +166,9 @@ def main() -> None:
 
 		# Call the get_voice function and call the get_song function for all the audio related stuff
 		try:
-			voiceover = VoiceCaller(rewritten_script, main_org._path + "/voiceover/output.mp3")
-			voiceover.get_voice()
-			music = MusicSelection(main_org._path + "/voiceover")
+			audio = VoiceCaller(rewritten_script, main_org._path + "/audio/output.mp3")
+			audio.get_voice()
+			music = MusicSelection(main_org._path + "/audio")
 			music.get_song()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
