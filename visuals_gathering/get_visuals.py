@@ -30,7 +30,7 @@ class VideoDownloader:
 					{"role": "system", "content": "Du bist jemand der Texte gut zusammenfassen kann."},
 					{
 						"role": "user",
-						"content": self._script + "\n\n-Fasse den Text in zwei Worten zusammen. Zwischen die Worte schreibst du '%20' und nicht mehr."
+						"content": self._script + "\n\n-Fasse den Text in einem Wort zusammen! Nicht mehr und nicht weniger!"
 					}
 				]
 			)
