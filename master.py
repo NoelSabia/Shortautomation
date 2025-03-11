@@ -13,6 +13,7 @@ class MasterOrganizer:
 	def __init__(self) -> None:
 		self._directory = []
 		self._browser = []
+		self._youtube = []
 		self._websites = []
 
 	# Load the program arguments into the master organizer object
@@ -28,6 +29,7 @@ class MasterOrganizer:
 			for block in blocks:
 				block_dir = None
 				block_browser = None
+				block_youtube = None
 				block_websites = []
 
 				# Parse each line with the regex
@@ -46,6 +48,10 @@ class MasterOrganizer:
 							block_browser = value
 						elif key == "website":
 							block_websites.append(value)
+						elif key == "youtube":
+							if block_youtube is not None:
+								raise ValueError("Error: Block contains omre than one 'youtube'.")
+							block_youtube = value
 
 				# Check for missing dir
 				if block_dir is None:
@@ -58,6 +64,7 @@ class MasterOrganizer:
 				# Append to internal lists
 				self._directory.append(block_dir)
 				self._browser.append(block_browser)
+				self._youtube.append(block_youtube)
 				self._websites.append(block_websites)
 
 	# Signal handler function to catch SIGINT and SIGTERM

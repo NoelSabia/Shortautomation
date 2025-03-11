@@ -1,4 +1,9 @@
-dir="~/Documents/test1"
+dir="~/Documents/channel1"
 browser="firefox"
-
+youtube="ShortautomizationNews.json"
 website="https://techcrunch.com/"
+
+dir="~/Documents/channel2"
+browser="firefox"
+youtube="test.json"
+website="test.com"

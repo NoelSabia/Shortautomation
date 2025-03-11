@@ -5,6 +5,7 @@ from voice_gathering.get_voice import VoiceCaller
 from visuals_gathering.get_visuals import VideoDownloader
 from shorts_fusion.capcut_merger import CapCutOrganizer
 from music_selection.selection import MusicSelection
+from shorts_fusion.upload_to_youtube import YoutubeUploader
 from pathlib import Path
 import shutil
 import sys
@@ -149,7 +150,7 @@ def main() -> None:
 		if len(args) < 2:
 			print(Fore.RED + "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..." + Style.RESET_ALL)
 			return
-		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[3:])
+		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[4:])
 		
 		# Call the create_folders function
 		main_org.create_folders()
@@ -189,6 +190,15 @@ def main() -> None:
 			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser, rewritten_script)
 			merger.orchastrate_fusion()
 		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
+		
+		# Call the upload_to_youtube functions that automatically uploads the video as you like
+		try:
+			uploader = YoutubeUploader(main_org._path + "/uploads", sys.argv[3])
+			uploader.upload_to_youtube
+		except:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
 			return

@@ -9,6 +9,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
   - [How and What to Install via pip](#how-and-what-to-install-via-pip)
   - [API Keys and How to Get Them](#api-keys-and-how-to-get-them)
   - [How to make a capcut account](#How-to-make-a-capcut-account)
+  - [How to get the JSONs to autoupload youtube shorts](#How-to-get-the-JSONs-to-autoupload-youtube-shorts)
 - [How to Use This Command-Line Program](#how-to-use-this-command-line-program)
 - [How to Use the Master Command-Line Program](#how-to-use-the-master-command-line-program)
    - [How to change the program args file correctly](#how-to-change-the-program-args-file-correctly)
@@ -61,6 +62,23 @@ You need a CapCut Account because this is the editor I choose to edit the video.
 Go to https://www.capcut.com and make yourself an account. This is highly recommended.
 The programm will eventually, after creating the script, audio and videos, open one of two browsers.
 Chrome or Firefox, you can specifiy the browser used [here](#how-to-change-the-program-args-file-correctly). If you don't use either of those, get fucked.
+
+### How to get the JSONs to autoupload youtube shorts
+1. You need a Google account to upload to YouTube (https://www.google.com/intl/de/account/about/)
+2. Go to: console.cloud.google.com/cloud-resource-manager
+3. Check that you use the correct Google account
+4. Click on "Create Project", give it a name and then click on create
+5. Click on the Pop-Up on the top right that says: "Select Project"
+6. Hover over "APIs & Services" and then click on "Enable APIs & services"
+7. Then search for " YouTube Data API v3"
+8. Enable it
+9. Click on "OAuth consent screen"
+10. Click on "Start"
+11. Give a name, the support mail, click on external, then again your mail, and accept the terms and conditions, then create
+12. Go to "Audience" and click on "Add Users" and add your mail
+13. Go to "Clients" click on "Create Client" and select "Web Application"
+14. Create URI1 and URI2 with http://localhost:8080/ and http://localhost:8080/oauth2callback and click on create
+15. Now Download the JSON and your ready to go
 
 
 ## How to Use This Command-Line Program
