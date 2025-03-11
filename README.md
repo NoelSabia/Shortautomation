@@ -13,6 +13,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 - [How to Use This Command-Line Program](#how-to-use-this-command-line-program)
 - [How to Use the Master Command-Line Program](#how-to-use-the-master-command-line-program)
    - [How to change the program args file correctly](#how-to-change-the-program-args-file-correctly)
+- [What Channels are integrated](#what-channels-are-integrated)
 
 
 ## Preflight Check List
@@ -29,8 +30,8 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 1. Navigate to the project folder in your terminal.  
 2. Create and activate a virtual environment:  
    ```bash
-   python -m venv venv
-   source venv/bin/activate
+   python -m venv .venv
+   source .venv/bin/activate
    ```
 
 
@@ -107,10 +108,25 @@ The program_args.txt file has blocks that will have one directory of where to sa
 
 1. dir=<value in form of a string> -> this key-pair value shows where all the output will be downloaded (recommended "~/Documents/<projectname>)
 2. browser=<value in form of a str> -> this key-pair value should either be chrome or firefox everything else is not supported
-3. website=<value in form of a str> -> this key-pair value gives the website to scrape. You can have as many website key-value pairs as you like
+3. youtube_german=<value in form of a str> -> this key-pair value is for uploads to the german channel
+4. youtube_english=<value in form of a str> -> this key-pair value is for uploads to the english channel
+5. website=<value in form of a str> -> this key-pair value gives the website to scrape. You can have as many website key-value pairs as you like
 
 The only problem is that if you don't use the default websites you either have to write your own python code to scrape or use the default scraper.
 With that knowledge, the default scraper might be useless or deliver very poorly!
 
 > [!NOTE]
 > A 10-min-mail will also work here 😉
+
+## What Channels are integrated
+- Technews (deutsch)
+- Geschichte (deutsch)
+- Politik (deutsch)
+- Reiseziele und Kulturen (deutsch)
+- Tierfakten (deutsch)
+---
+- Technews (englisch)
+- History (englisch)
+- Politics (englisch)
+- Traveltargets and cultures (englisch)
+- Animalfacts (englisch)

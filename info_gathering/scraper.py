@@ -18,14 +18,6 @@ class Scraper:
 		self._targets = targets
 		self._keywords = keywords
 
-	def add_keywords(self, keywords: list[str]) -> None:
-		"""
-		Add keywords to the list of keywords
-		:param keywords: list of keywords to add
-		:return:
-		"""
-		self._keywords.extend(keywords)
-
 	def scrape(self) -> str:
 		"""
 		Scrape the websites for the keywords provided
@@ -91,15 +83,24 @@ class Scraper:
 		:param keywords:
 		:return:
 		"""
-		sublinks: list[str] = []
-		raw_html = requests.get(link)
+		sublinks = []
+		session = requests.Session()
+		session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+		raw_html = session.get(link)
+		print(raw_html.status)
 		if raw_html.status_code == 200:
 			soup = BeautifulSoup(raw_html.text, 'html.parser')
 			links = soup.find_all('a')
-			for link in links:
-				href = link.get('href')
-				if href and any(keyword in href for keyword in self._keywords) and href not in sublinks:
-					sublinks.append(href)
+			if not self._keywords:
+				for link in links:
+					href = link.get('href')
+					if href not in sublinks:
+						sublinks.append(href)
+			else:
+				for link in links:
+					href = link.get('href')
+					if href and any(keyword in href for keyword in self._keywords) and href not in sublinks:
+						sublinks.append(href)
 		return sublinks
 
 	def __fetch_texts_(self, sublink: str) -> list[str]:
@@ -108,8 +109,8 @@ class Scraper:
         :param sublink: URL of the sublink to fetch
         :return: List of paragraphs' text
         """
+		paragraphs_text = []
 		if sublink == "https://techcrunch.com/":
-			paragraphs_text = []
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
 				soup = BeautifulSoup(raw_html.text, 'html.parser')
@@ -119,8 +120,11 @@ class Scraper:
 					for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
 			return paragraphs_text
+		elif sublink == "https://www.smithsonianmag.com/category/history/":
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				print(raw_html)
 		else:
-			paragraphs_text = []
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
 				soup = BeautifulSoup(raw_html.text, 'html.parser')
@@ -131,3 +135,11 @@ class Scraper:
 					if text:
 						paragraphs_text.append(text)
 			return paragraphs_text
+		return paragraphs_text
+
+def main() -> None:
+	test = Scraper(["https://www.smithsonianmag.com/category/history/"], [])
+	test.scrape()
+
+if __name__ == "__main__":
+	main()
