@@ -1,4 +1,5 @@
 import requests
+import random
 from random import randint
 from bs4 import BeautifulSoup
 from colorama import Fore, Style, init
@@ -69,7 +70,7 @@ class Scraper:
 		# Loop through the sublinks in parallel and get the text from the paragraphs
 		with ThreadPoolExecutor() as executor:
 			futures = [
-				executor.submit(self.__fetch_texts_, sublink) \
+				executor.submit(self.__fetch_texts_, self._targets, sublink) \
 				for sublink in user_sublinks_result
 			]
 			for future in as_completed(futures):
@@ -88,7 +89,10 @@ class Scraper:
 		sublinks = []
 		visited = set()
 		raw_html = requests.get(link)
-		print(raw_html.status_code)
+		if raw_html.status_code == 200:
+			print(Fore.GREEN + f"\nStatus Code of {raw_html.status_code} received." + Style.RESET_ALL)
+		else:
+			print(Fore.RED + f"\nStatus Code of {raw_html.status_code} received." + Style.RESET_ALL)
 		if raw_html.status_code == 200:
 			soup = BeautifulSoup(raw_html.text, 'html.parser')
 
@@ -126,14 +130,13 @@ class Scraper:
 										transcript_anchor = sub_soup.find('a', href='#transcript')
 										if transcript_anchor:
 											sublinks.append(href)
-			elif not self._keywords and link == "https://www.politico.eu":
-				if link == "https://www.politico.eu/":
+			elif not self._keywords and link == "https://www.politico.eu/":
 					main_section = soup.select_one("main#main.main--front-page")
 					if main_section:
 						links = main_section.find_all('a')
 						for a in links:
 							href = a.get('href')
-							if href and href not in sublinks and len(sublinks) < 10:
+							if href and href not in sublinks and len(sublinks) < 20:
 								sublinks.append(href)
 			elif not self._keywords and link == "https://www.neverendingfootsteps.com/travel-guides/":
 				main_section = soup.select_one("main.vw-content-main")
@@ -146,7 +149,7 @@ class Scraper:
 				print(Fore.RED + "\nNo known website found. Please write your own scraper." + Style.RESET_ALL)
 		return sublinks
 
-	def __fetch_texts_(self, sublink: str) -> list[str]:
+	def __fetch_texts_(self, website: list[str], sublink: str) -> list[str]:
 		"""
         Fetch and process the sublink to extract paragraphs.
         :param sublink: URL of the sublink to fetch
@@ -162,15 +165,34 @@ class Scraper:
 					paragraphs = main_content.find_all('p')
 					for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
-			return paragraphs_text
-		elif sublink == "https://www.historydaily.com/episodes/":
-			pass
-		elif sublink == "https://www.politico.eu/":
-			pass
-		elif sublink == "https://www.neverendingfootsteps.com/travel-guides/":
-			pass
-		elif sublink == "https://www.smithsonianmag.com/category/history/":
-			pass
+		elif website[0] == "https://www.historydaily.com/episodes/":
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				soup = BeautifulSoup(raw_html.text, 'html.parser')
+				parapgraphs = soup.find_all('p')
+				for paragraph in paragraphs:
+						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+		elif website[0] == "https://www.politico.eu/":
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				soup = BeautifulSoup(raw_html.text, 'html.parser')
+				parapgraphs = soup.find_all('p')
+				for paragraph in paragraphs:
+						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+		elif website[0] == "https://www.neverendingfootsteps.com/travel-guides/":
+			raw_html = requests.get(sublink)
+			if raw_html.status_code == 200:
+				soup = BeautifulSoup(raw_html.text, 'html.parser')
+				links = soup.find_all('a')
+				anchor_hrefs = [a.get('href') for a in links if a.get('href')]
+				if anchor_hrefs:
+					chosen_href = random.choice(anchor_hrefs)
+					sub_html = requests.get(chosen_href)
+					if sub_html.status_code == 200:
+						sub_soup = BeautifulSoup(sub_html.text, 'html.parser')
+						paragraphs = sub_soup.find_all('p')
+						for paragraph in paragraphs:
+							paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
 		else:
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -182,10 +204,3 @@ class Scraper:
 					if text:
 						paragraphs_text.append(text)
 		return paragraphs_text
-
-def main() -> None:
-	test = Scraper(["https://www.neverendingfootsteps.com/travel-guides/"], [])
-	test.scrape()
-
-if __name__ == "__main__":
-	main()
