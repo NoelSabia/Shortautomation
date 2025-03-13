@@ -1,7 +1,9 @@
 import requests
+from random import randint
 from bs4 import BeautifulSoup
 from colorama import Fore, Style, init
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin
 
 # Initialize colorama
 init()
@@ -84,23 +86,64 @@ class Scraper:
 		:return:
 		"""
 		sublinks = []
-		session = requests.Session()
-		session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-		raw_html = session.get(link)
-		print(raw_html.status)
+		visited = set()
+		raw_html = requests.get(link)
+		print(raw_html.status_code)
 		if raw_html.status_code == 200:
 			soup = BeautifulSoup(raw_html.text, 'html.parser')
-			links = soup.find_all('a')
-			if not self._keywords:
-				for link in links:
-					href = link.get('href')
-					if href not in sublinks:
+
+			 # for techcrunch
+			if not self._keywords and link == "https://techcrunch.com/":
+				main_section = soup.select_one("main.wp-block-group.is-layout-constrained.wp-block-group-is-layout-constrained")
+				if main_section:
+					links = main_section.find_all('a')
+					for a in links:
+						href = a.get('href')
+						if href and not href.startswith("http"):
+							href = urljoin(link, href)
+						if href and "/author" not in href and "/category" not in href and href not in sublinks and len(sublinks) < 20:
+							sublinks.append(href)
+			# for historydaily
+			elif not self._keywords and link == "https://www.historydaily.com/episodes/":
+				page_url = f"{link}?page={randint(1, 42)}"
+				if page_url not in visited:
+					visited.add(page_url)
+					raw_html = requests.get(page_url)
+					if raw_html.status_code == 200:
+						soup = BeautifulSoup(raw_html.text, 'html.parser')
+						div = soup.select_one("div.row-wrapper")
+						if div:
+							links = div.find_all('a')
+							for a in links:
+								href = a.get('href')
+								if href and not href.startswith("http"):
+									href = urljoin(link, href)
+								if href and href not in visited and len(sublinks) < 20:
+									visited.add(href)
+									sub_html = requests.get(href)
+									if sub_html.status_code == 200:
+										sub_soup = BeautifulSoup(sub_html.text, 'html.parser')
+										transcript_anchor = sub_soup.find('a', href='#transcript')
+										if transcript_anchor:
+											sublinks.append(href)
+			elif not self._keywords and link == "https://www.politico.eu":
+				if link == "https://www.politico.eu/":
+					main_section = soup.select_one("main#main.main--front-page")
+					if main_section:
+						links = main_section.find_all('a')
+						for a in links:
+							href = a.get('href')
+							if href and href not in sublinks and len(sublinks) < 10:
+								sublinks.append(href)
+			elif not self._keywords and link == "https://www.neverendingfootsteps.com/travel-guides/":
+				main_section = soup.select_one("main.vw-content-main")
+				if main_section:
+					links = main_section.find_all('a')
+					for link in links:
+						href = link.get('href')
 						sublinks.append(href)
 			else:
-				for link in links:
-					href = link.get('href')
-					if href and any(keyword in href for keyword in self._keywords) and href not in sublinks:
-						sublinks.append(href)
+				print(Fore.RED + "\nNo known website found. Please write your own scraper." + Style.RESET_ALL)
 		return sublinks
 
 	def __fetch_texts_(self, sublink: str) -> list[str]:
@@ -120,10 +163,14 @@ class Scraper:
 					for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
 			return paragraphs_text
+		elif sublink == "https://www.historydaily.com/episodes/":
+			pass
+		elif sublink == "https://www.politico.eu/":
+			pass
+		elif sublink == "https://www.neverendingfootsteps.com/travel-guides/":
+			pass
 		elif sublink == "https://www.smithsonianmag.com/category/history/":
-			raw_html = requests.get(sublink)
-			if raw_html.status_code == 200:
-				print(raw_html)
+			pass
 		else:
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -134,11 +181,10 @@ class Scraper:
 					text = paragraph.get_text(separator="\n", strip=True)
 					if text:
 						paragraphs_text.append(text)
-			return paragraphs_text
 		return paragraphs_text
 
 def main() -> None:
-	test = Scraper(["https://www.smithsonianmag.com/category/history/"], [])
+	test = Scraper(["https://www.neverendingfootsteps.com/travel-guides/"], [])
 	test.scrape()
 
 if __name__ == "__main__":

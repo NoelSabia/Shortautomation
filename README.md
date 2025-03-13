@@ -123,10 +123,10 @@ With that knowledge, the default scraper might be useless or deliver very poorly
 - Geschichte (deutsch)
 - Politik (deutsch)
 - Reiseziele und Kulturen (deutsch)
-- Tierfakten (deutsch)
+- Tierfakten (deutsch) (not yet integrated)
 ---
 - Technews (englisch)
 - History (englisch)
 - Politics (englisch)
 - Traveltargets and cultures (englisch)
-- Animalfacts (englisch)
+- Animalfacts (englisch) (not yet integrated)
