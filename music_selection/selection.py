@@ -29,44 +29,46 @@ class MusicSelection:
 		Get the duration of the voice_audio and cut the song accordingly.
 		:return: None
 		"""
-		voice_file = self._output_path / "cleaned_output.mp3"
+		voice_files = [self._output_path / "cleaned_output_german.mp3", self._output_path / "cleaned_output_english.mp3"]
+		output_file_names = ["cut_song_german.mp3", "cut_song_english.mp3"]
 		duration = 0
 
 		# Get the duration of the voice_audio to then cut the song to the same length
-		result = subprocess.run(
-			[
-				"ffprobe",
-				"-v", "error",
-				"-show_entries", "format=duration",
-				"-of", "default=noprint_wrappers=1:nokey=1",
-				voice_file
-			],
-			stdout=subprocess.PIPE,
-			stderr=subprocess.STDOUT,
-			text=True
-		)
-		try:
-			tmp_duration = float(result.stdout.strip())
-			duration = int(tmp_duration)
-		except ValueError:
-			print("Could not retrieve duration.")
-		
-		# Cut the song to the duration of the voice_audio
-		command = [
-			"ffmpeg",
-			"-i", str(self._output_path / song),
-			"-t", str(duration),
-			"-y",
-			str(self._output_path / "cut_song.mp3")
-		]
-		try:
-			subprocess.run(command, check=True)
-			# Delete original file only after successful cut
-			if os.path.exists(self._output_path / song):
-				os.remove(self._output_path / song)
-				print(Fore.GREEN + f"\nDeleted original file: {self._output_path / song}" + Style.RESET_ALL)
-		except subprocess.CalledProcessError as e:
-			print(Fore.RED + f"\nFailed to cut {song} to {duration} seconds." + Style.RESET_ALL)
+		for voice_file, output_file_name in zip(voice_files, output_file_names):
+			result = subprocess.run(
+				[
+					"ffprobe",
+					"-v", "error",
+					"-show_entries", "format=duration",
+					"-of", "default=noprint_wrappers=1:nokey=1",
+					voice_file
+				],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				text=True
+			)
+			try:
+				tmp_duration = float(result.stdout.strip())
+				duration = int(tmp_duration)
+			except ValueError:
+				print("Could not retrieve duration.")
+			
+			# Cut the song to the duration of the voice_audio
+			command = [
+				"ffmpeg",
+				"-i", str(self._output_path / song),
+				"-t", str(duration),
+				"-y",
+				str(self._output_path / output_file_name)
+			]
+			try:
+				subprocess.run(command, check=True)
+				# Delete original file only after successful cut
+				if os.path.exists(self._output_path / song):
+					os.remove(self._output_path / song)
+					print(Fore.GREEN + f"\nDeleted original file: {self._output_path / song}" + Style.RESET_ALL)
+			except subprocess.CalledProcessError as e:
+				print(Fore.RED + f"\nFailed to cut {song} to {duration} seconds." + Style.RESET_ALL)
 		
 	def get_song(self) -> str:
 		"""
