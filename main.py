@@ -177,8 +177,9 @@ def main() -> None:
 		
 		# Call the get_cc_vids function
 		try:
-			visual = VideoDownloader(main_org._path + "/visuals", paths_to_scripts[1])
+			visual = VideoDownloader([main_org._path + "/visuals", main_org._path] , paths_to_scripts[1])
 			visual.download_visuals()
+			visual.select_visuals()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)

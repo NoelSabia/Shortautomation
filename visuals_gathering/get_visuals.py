@@ -1,5 +1,6 @@
 import os
 import requests
+import subprocess
 from colorama import Fore, Style
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -9,7 +10,7 @@ from yt_dlp import YoutubeDL
 load_dotenv()
 
 class VideoDownloader:
-	def __init__(self, output_path: str, script: str) -> None:
+	def __init__(self, output_path: list[str], script: str) -> None:
 		self._output_path = output_path
 		self._script = script
 		self._query = None
@@ -145,8 +146,8 @@ class VideoDownloader:
 		image_urls = self.get_image_urls()
 		
 		# have correct path for the files
-		directory_videos = os.path.expanduser(f"{self._output_path}/videos")
-		directory_images = os.path.expanduser(f"{self._output_path}/images")
+		directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos")
+		directory_images = os.path.expanduser(f"{self._output_path[0]}/images")
 		
 		# Download videos
 		print(Fore.GREEN + f"\nDownloading {len(video_urls)} videos" + Style.RESET_ALL)
@@ -172,3 +173,68 @@ class VideoDownloader:
 					handler.write(image_data)
 			except Exception as e:
 				print(Fore.YELLOW + f"Error downloading image {image}: {e}" + Style.RESET_ALL)
+	
+	def calculate_visuals_needed(self) -> int:
+		path = os.path.expanduser(self._output_path[1]) + "/audio/cleaned_output_german.mp3"
+		result = subprocess.run(
+			[
+				"ffprobe",
+				"-v", "error",
+				"-show_entries", "format=duration",
+				"-of", "default=noprint_wrappers=1:nokey=1",
+				path			
+			],
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT,
+			text=True
+		)
+		try:
+			tmp_duration = float(result.stdout.strip())
+			duration = int(tmp_duration)
+			return duration
+		except ValueError:
+			print(Fore.YELLOW + "Could not retrieve duration." + Style.RESET_ALL)
+	
+	def calculate_image_num(self) -> int:
+		directory_images = os.path.expanduser(f"{self._output_path[0]}/images")
+
+		image_extensions = {'.jpg', '.jpeg', '.png'}
+
+		image_count = len([
+			f for f in os.listdir(directory_images)
+			if os.path.isfile(os.path.join(directory_images, f)) and os.path.splitext(f)[1].lower() in image_extensions
+		])
+		return image_count
+
+	def calculate_videos_num(self) -> int:
+		directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos")
+		video_extention = {'.mp4'}
+
+		video_count = len([
+			f for f in os.listdir(directory_videos)
+			if os.path.isfile(os.path.join(directory_videos, f)) and os.path.splitext(f)[1].lower() in video_extention
+		])
+		return video_count
+	
+	def select_visuals(self) -> None:
+		"""
+		Allowed to select the visuals that the user want's to use in the video
+		:return:
+		"""
+		needed_visuals = self.calculate_visuals_needed()
+		number_of_picked_visuals = 0
+		number_of_images = self.calculate_image_num()
+		number_of_videos = self.calculate_video_num()
+
+		#display the images first
+		print(Fore.GREEN + f"\nPick around {needed_visuals} visuals." + Style.RESET_ALL)
+		print(Fore.GREEN + f"\nYou can now pick images. There is a total of {number_of_images} images." + Style.RESET_ALL)
+
+
+		#if yes mv it to another folder
+		#if no delete
+		#display the videos next, after cutting them in 3 sec peaces
+		print(Fore.GREEN + f"\nYou can now pick videos. There is a total of {number_of_videos} images." + Style.RESET_ALL)
+		#yes -> mv to another folder
+		#no
+		#skip hole video
