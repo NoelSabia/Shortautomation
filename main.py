@@ -161,13 +161,12 @@ def main() -> None:
 		main_org.check_if_error_exit(script)
 		
 		# Call the gpt_rewrite function and check for return value
-		gpt = GPTCaller(main_org._path + "/script/script.txt")
-		rewritten_script = gpt.rewrite(script)
-		main_org.check_if_error_exit(rewritten_script)
+		gpt = GPTCaller([main_org._path + "/script/script_german.txt", main_org._path + "/script/script_english.txt"], ["deutsch", "englisch"])
+		paths_to_scripts = gpt.rewrite(script)
 
 		# Call the get_voice function and call the get_song function for all the audio related stuff
 		try:
-			audio = VoiceCaller(rewritten_script, main_org._path + "/audio/output.mp3")
+			audio = VoiceCaller(paths_to_scripts, [main_org._path + "/audio/output_german.mp3", main_org._path + "/audio/output_english.mp3"])
 			audio.get_voice()
 			music = MusicSelection(main_org._path + "/audio")
 			music.get_song()
@@ -178,16 +177,16 @@ def main() -> None:
 		
 		# Call the get_cc_vids function
 		try:
-			visual = VideoDownloader(main_org._path + "/visuals", rewritten_script)
+			visual = VideoDownloader(main_org._path + "/visuals", paths_to_scripts[1])
 			visual.download_visuals()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
 			return
 		
-		# Call the capcut_merger function (if full autiomation with videos are doable this will be deprecated)
+		# Call the capcut_merger function (if full autiomation with videos are doable (is doable) this will be deprecated)
 		try:
-			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser, rewritten_script)
+			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser)
 			merger.orchastrate_fusion()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)

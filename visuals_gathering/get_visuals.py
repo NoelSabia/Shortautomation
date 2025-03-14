@@ -27,10 +27,10 @@ class VideoDownloader:
 			completion = client.chat.completions.create(
 				model="gpt-4o-mini-2024-07-18",
 				messages=[
-					{"role": "system", "content": "Du bist jemand der Texte gut zusammenfassen kann."},
+					{"role": "system", "content": "You are someone who can summarize texts well."},
 					{
 						"role": "user",
-						"content": self._script + "\n\n-Fasse den Text in einem Wort zusammen! Nicht mehr und nicht weniger!"
+						"content": self._script + "\n\n-Summarize the text in one english word! No more, no less!"
 					}
 				]
 			)

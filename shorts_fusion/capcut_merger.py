@@ -9,10 +9,9 @@ from pathlib import Path
 load_dotenv()
 
 class CapCutOrganizer:
-    def __init__(self, output_path: str, browser: str, script: str) -> None:
+    def __init__(self, output_path: str, browser: str) -> None:
         self._browser = browser
         self._output_path = output_path
-        self._script = script
 
     def open_browser(self) -> None:
         """
