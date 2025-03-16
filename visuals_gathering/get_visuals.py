@@ -192,7 +192,7 @@ class VideoDownloader:
 		)
 		try:
 			tmp_duration = float(result.stdout.strip())
-			duration = int(tmp_duration)
+			duration = int(int(tmp_duration) / 3)
 			return duration
 		except ValueError:
 			print(Fore.YELLOW + "Could not retrieve duration." + Style.RESET_ALL)
@@ -210,16 +210,79 @@ class VideoDownloader:
 
 	def get_all_videos(self) -> list[list[str]]:
 		directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos")
-		video_extention = {'.mp4'}
-
-		video_count = [
+		video_extension = {'.mp4'}
+		
+		# Get all video files
+		video_files = [
 			f for f in os.listdir(directory_videos)
-			if os.path.isfile(os.path.join(directory_videos, f)) and os.path.splitext(f)[1].lower() in video_extention
+			if os.path.isfile(os.path.join(directory_videos, f)) and os.path.splitext(f)[1].lower() in video_extension
 		]
-
-		#here implement the cutting of the videos
-
-		return video_count
+		
+		# Create a directory for cut videos if it doesn't exist
+		cut_directory = os.path.join(directory_videos, "segments")
+		if not os.path.exists(cut_directory):
+			os.makedirs(cut_directory)
+		
+		all_segments = []
+		
+		# Process each video
+		for video_file in video_files:
+			video_path = os.path.join(directory_videos, video_file)
+			video_name = os.path.splitext(video_file)[0]
+			
+			# Get video duration using ffprobe
+			result = subprocess.run([
+				"ffprobe", 
+				"-v", "error",
+				"-show_entries", "format=duration",
+				"-of", "default=noprint_wrappers=1:nokey=1",
+				video_path
+			], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+			
+			try:
+				duration = float(result.stdout.strip())
+				# Calculate number of 3-second segments
+				num_segments = int(duration / 3)
+				
+				segments_for_video = []
+				
+				# Cut video into 3-second segments
+				for i in range(num_segments):
+					start_time = i * 3
+					segment_name = f"{video_name}_segment_{i}.mp4"
+					output_path = os.path.join(cut_directory, segment_name)
+					
+					# Use ffmpeg to cut the segment - put -ss before input for better seeking
+					subprocess.run([
+						"ffmpeg",
+						"-y",  # Overwrite output file if it exists
+						"-ss", str(start_time),  # Moved to before input file
+						"-i", video_path,
+						"-t", "3",  # 3-second duration
+						# Remove copy mode to ensure accurate cutting
+						# "-c:v", "copy",
+						# "-c:a", "copy",
+						"-c:v", "libx264",  # Re-encode with h264 for accuracy
+						"-c:a", "aac",      # Re-encode audio 
+						"-loglevel", "error",  # Minimal logging
+						output_path
+					], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+					
+					segments_for_video.append(segment_name)
+				
+				# Add this video's segments to our main list
+				all_segments.append(segments_for_video)
+				print(Fore.GREEN + f"\nCut {video_file} into {len(segments_for_video)} segments." + Style.RESET_ALL)
+				
+			except (ValueError, subprocess.SubprocessError) as e:
+				print(Fore.YELLOW + f"\nError processing video {video_file}: {e}" + Style.RESET_ALL)
+		
+		# Return list of lists, where each inner list contains segments from one original video
+		if not all_segments:
+			# If no segments were created, return the original video files
+			return [video_files]
+		
+		return all_segments
 
 	def select_images(self) -> None:
 		"""
@@ -278,62 +341,89 @@ class VideoDownloader:
 
 	def select_videos(self) -> None:
 		"""
-		Allowed to select the videos that the user wants to use in the video
+		Allowed to select video segments that the user wants to use in the final video
 		:return:
 		"""
-		# Get list of available video files from get_all_videos
-		preliminary_video_list = self.get_all_videos()
-		number_of_videos = len(preliminary_video_list)
-		final_video_list = []
+		# Get list of available video segments from get_all_videos
+		video_segments_by_source = self.get_all_videos()
+		number_of_source_videos = len(video_segments_by_source)
+		final_segments_list = []
 
-		print(Fore.GREEN + f"\nYou can now pick videos. There is a total of {number_of_videos} videos." + Style.RESET_ALL)
+		print(Fore.GREEN + f"\nYou can now pick video segments. There are segments from {number_of_source_videos} source videos." + Style.RESET_ALL)
 
 		# Generate unique terminal identifier
 		terminal_id = f"terminal_{os.getpid()}"
 
-		for i, video in enumerate(preliminary_video_list):
-			directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos/")
-			print(directory_videos + video)
-			print(Fore.GREEN + f"\nVideo {i + 1} of {number_of_videos}. Needed visuals: {self._number_of_picked_visuals}/{self._needed_visuals}" + Style.RESET_ALL)
-
-			# Tag current terminal window
-			subprocess.run(["wmctrl", "-T", terminal_id, "-r", ":ACTIVE:"])
-
-			# Open the video in mpv with focus control flags
-			video_proc = subprocess.Popen(
-				["mpv", "--no-focus-on-open", "--force-window=immediate", directory_videos + video],
-				stdout=subprocess.DEVNULL,
-				stderr=subprocess.DEVNULL,
-				start_new_session=True
-			)
+		# Iterate through each source video's segments
+		for source_idx, segments in enumerate(video_segments_by_source):
+			print(Fore.BLUE + f"\nViewing segments from source video {source_idx + 1}/{number_of_source_videos}" + Style.RESET_ALL)
+			print(Fore.BLUE + f"This source video has {len(segments)} segments" + Style.RESET_ALL)
 			
-			# Longer pause to allow mpv to fully initialize
-			subprocess.run(["sleep", "0.3"])
+			 # Flag to check if we should skip this source video
+			skip_source = False
 			
-			# Force focus back to terminal - repeat to ensure it takes effect
-			subprocess.run(["wmctrl", "-a", terminal_id])
-			subprocess.run(["sleep", "0.1"])
-			subprocess.run(["wmctrl", "-a", terminal_id])
-
-			user_input = input(Fore.GREEN + "\nUse video(y) or delete video(n)? (y/n): " + Style.RESET_ALL)
-			while True:
-				if user_input.lower() == 'y':
-					final_video_list.append(video)
-					video_proc.terminate()
-					self._number_of_picked_visuals += 1
+			# Iterate through each segment for this source video
+			for segment_idx, segment in enumerate(segments):
+				# Skip the rest of this loop if we're skipping this source
+				if skip_source:
 					break
-				elif user_input.lower() == 'n':
-					video_proc.terminate()
-					break
-				else:
-					print(Fore.YELLOW + f"\nInput '{user_input}' not recognized as a command, use y or n." + Style.RESET_ALL)
-					user_input = input(Fore.GREEN + "\nUse video(y) or delete video(n)? (y/n): " + Style.RESET_ALL)
+					
+				# Path to segment is in the segments subdirectory
+				segment_path = os.path.join(os.path.expanduser(f"{self._output_path[0]}/videos/segments"), segment)
+				
+				print(Fore.GREEN + f"\nSegment {segment_idx + 1}/{len(segments)} from source {source_idx + 1}. Needed visuals: {self._number_of_picked_visuals}/{self._needed_visuals}" + Style.RESET_ALL)
+				print(f"Segment file: {segment}")
+				
+				# Tag current terminal window
+				subprocess.run(["wmctrl", "-T", terminal_id, "-r", ":ACTIVE:"])
 
-		# We move the selected videos to the final_video folder to later process only the selected videos
-		for final_video in final_video_list:
-			source_path = os.path.join(os.path.expanduser(f"{self._output_path[0]}/videos"), final_video)
-			destination_path = os.path.expanduser(self._output_path[1]) + "/final_videos/"
-			subprocess.run(["mv", source_path, destination_path])
+				# Open the video segment in mpv with focus control flags
+				video_proc = subprocess.Popen(
+					["mpv", "--no-focus-on-open", "--force-window=immediate", segment_path],
+					stdout=subprocess.DEVNULL,
+					stderr=subprocess.DEVNULL,
+					start_new_session=True
+				)
+				
+				# Longer pause to allow mpv to fully initialize
+				subprocess.run(["sleep", "0.3"])
+				
+				# Force focus back to terminal - repeat to ensure it takes effect
+				subprocess.run(["wmctrl", "-a", terminal_id])
+				subprocess.run(["sleep", "0.1"])
+				subprocess.run(["wmctrl", "-a", terminal_id])
+
+				user_input = input(Fore.GREEN + "\nUse this segment(y), skip it(n), or skip all segments from this source(s)? (y/n/s): " + Style.RESET_ALL)
+				while True:
+					if user_input.lower() == 'y':
+						final_segments_list.append(segment)
+						video_proc.terminate()
+						self._number_of_picked_visuals += 1
+						break
+					elif user_input.lower() == 'n':
+						video_proc.terminate()
+						break
+					elif user_input.lower() == 's':
+						video_proc.terminate()
+						skip_source = True
+						print(Fore.YELLOW + f"Skipping all remaining segments from source {source_idx + 1}" + Style.RESET_ALL)
+						break
+					else:
+						print(Fore.YELLOW + f"\nInput '{user_input}' not recognized as a command, use y, n, or s." + Style.RESET_ALL)
+						user_input = input(Fore.GREEN + "\nUse segment(y), skip it(n), or skip all segments from this source(s)? (y/n/s): " + Style.RESET_ALL)
+
+		# Create the destination directory if it doesn't exist
+		destination_dir = os.path.expanduser(self._output_path[1]) + "/final_videos/"
+		if not os.path.exists(destination_dir):
+			os.makedirs(destination_dir)
+
+		# Move the selected segments to the final_videos folder
+		for final_segment in final_segments_list:
+			source_path = os.path.join(os.path.expanduser(f"{self._output_path[0]}/videos/segments"), final_segment)
+			destination_path = os.path.expanduser(self._output_path[1]) + "/visuals/final_videos/"
+			subprocess.run(["cp", source_path, destination_path])
+			print("")
+			print(Fore.GREEN + f"Copied segment {final_segment} to final videos folder" + Style.RESET_ALL)
 
 	def select_visuals(self) -> None:
 		"""
@@ -345,17 +435,8 @@ class VideoDownloader:
 		#this loop will allow the user to select other images and video if the threshold of needed visuals are not passed
 		while True:
 			if enough_visuals == None or enough_visuals.lower() == 'n':
-				self.select_images()
+				# self.select_images()
 				self.select_videos()
 			elif enough_visuals.lower() == 'y':
 				break
 			enough_visuals = input(Fore.GREEN + f"\nDo you have enough visuals(y) or want to look again over the materials(n)? (y/n): ")
-
-
-def main() -> None:
-	video = VideoDownloader(["~/Documents/test" + "/visuals", "~/Documents/test"], "Elon Musk, geboren 1971 in Südafrika, ist ein Visionär, der Tesla zur führenden Marke für Elektroautos machte. Tesla wurde 2003 gegründet, doch erst mit Musks Einstieg 2004 gewann das Unternehmen an Bedeutung. Mit dem Tesla Roadster (2008) zeigte Tesla, dass Elektroautos leistungsstark sein können. Später folgten Modelle wie S, X, 3 und Y, die Elektromobilität massentauglich machten. Neben Autos entwickelt Tesla auch Batteriespeicher und Solartechnologien. Trotz Produktionsengpässen und Kritik bleibt Tesla ein Innovationsführer, der traditionelle Autobauer zum Umdenken zwingt. Die Gigafactory sorgt für nachhaltige Batterien, und Musks Ziel bleibt eine emissionsfreie Zukunft. Elon Musk treibt mit Tesla die Energiewende voran. Seine Vision und unkonventionelle Art machen ihn zu einer der einflussreichsten Persönlichkeiten der Technologiebranche.")
-	# video.download_visuals()
-	video.select_visuals()
-
-if __name__ == "__main__":
-	main()
