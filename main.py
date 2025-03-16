@@ -47,6 +47,10 @@ class Main_Organizer:
 		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/visuals/videos").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
+		directory = Path(f"{self._path}/visuals/final_images").expanduser()
+		directory.mkdir(parents=True, exist_ok=True)
+		directory = Path(f"{self._path}/visuals/final_videos").expanduser()
+		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/script").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/upload").expanduser()
@@ -114,7 +118,7 @@ class Main_Organizer:
 		:return:
 		"""
 		if returned_str is None:
-			print(Fore.RED + "\nNothing->(None) returned. Exiting..." + Style.RESET_ALL)
+			print(Fore.RED + "\nNothing -> (None) returned. Exiting..." + Style.RESET_ALL)
 			self.clean_up_everything()
 			sys.exit(1)
 

@@ -7,6 +7,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
   - [How to Install Python](#how-to-install-python)
   - [How to Set Up a Virtual Environment](#how-to-set-up-a-virtual-environment)
   - [How and What to Install via pip](#how-and-what-to-install-via-pip)
+  - [How to install wmctrl](#how-to-install-wmctrl)
   - [API Keys and How to Get Them](#api-keys-and-how-to-get-them)
   - [How to make a capcut account](#How-to-make-a-capcut-account)
   - [How to get the JSONs to autoupload youtube shorts](#How-to-get-the-JSONs-to-autoupload-youtube-shorts)
@@ -36,6 +37,15 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 
 
 ### How and What to Install via pip
+Just to adress the elephant in the room wmctrl is a command_line tool that controls windos.
+This in combination with feh, an image viewer, opens the possiblity to don't lose focus on the terminal and still be able to view every image and video.
+The same combination just with mpv instead of feh is used for videos.
+For that install:
+```bash
+   sudo apt install wmctrl feh mpv -y
+```
+
+### How and What to Install via pip
 1. Ensure you’re in the virtual environment.  
 2. Install dependencies and ffmpeg on your system:  
    ```bash
@@ -55,14 +65,8 @@ A command-line program that streamlines creating short videos, shorts for YouTub
    ELEVEN_LABS_API_X=your_elevenlabs_key
    ```
 > [!TIP]
-> You can use a 10-min-mail to create endless free eleven labs api-keys. The more the better.
+> You can use a 10-min-mail to create endless free eleven labs api-keys. The more the better. 😉
 
-
-### How to make a CapCut Account
-You need a CapCut Account because this is the editor I choose to edit the video.
-Go to https://www.capcut.com and make yourself an account. This is highly recommended.
-The programm will eventually, after creating the script, audio and videos, open one of two browsers.
-Chrome or Firefox, you can specifiy the browser used [here](#how-to-change-the-program-args-file-correctly). If you don't use either of those, get fucked.
 
 ### How to get the JSONs to autoupload youtube shorts
 1. You need a Google account to upload to YouTube (https://www.google.com/intl/de/account/about/)
@@ -112,11 +116,8 @@ The program_args.txt file has blocks that will have one directory of where to sa
 4. youtube_english=<value in form of a str> -> this key-pair value is for uploads to the english channel
 5. website=<value in form of a str> -> this key-pair value gives the website to scrape. You can have as many website key-value pairs as you like
 
-The only problem is that if you don't use the default websites you either have to write your own python code to scrape or use the default scraper.
-With that knowledge, the default scraper might be useless or deliver very poorly!
-
-> [!NOTE]
-> A 10-min-mail will also work here 😉
+> [!IMPORTANT]
+> The only problem is that if you don't use the default websites you have to write your own python code to scrape.
 
 ## What Channels are integrated
 - Technews (deutsch)
