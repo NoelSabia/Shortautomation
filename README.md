@@ -36,6 +36,18 @@ A command-line program that streamlines creating short videos, shorts for YouTub
    ```
 
 
+
+### How and What to Install via pip
+1. Ensure you’re in the virtual environment.  
+2. Install dependencies and ffmpeg on your system:  
+   ```bash
+   pip install colorama openai dotenv requests bs4 selenium webdriver_manager yt-dlp ffmpeg-python elevenlabs google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client imageio==2.4.1 librosa==0.10.1 hydra-core==1.3.2 moviepy==0.2.3.5 numpy==1.23.5 torch transformers==4.35.2 openai-whisper
+   ```
+3. Alternative you can use a requirements in the root of the repository and install everything in one go:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
 ### How and What to Install via pip
 Just to adress the elephant in the room wmctrl is a command_line tool that controls windos.
 This in combination with feh, an image viewer, opens the possiblity to don't lose focus on the terminal and still be able to view every image and video.
@@ -44,18 +56,6 @@ For that install:
 ```bash
    sudo apt install wmctrl feh mpv -y
 ```
-
-### How and What to Install via pip
-1. Ensure you’re in the virtual environment.  
-2. Install dependencies and ffmpeg on your system:  
-   ```bash
-   pip install colorama openai dotenv requests bs4 selenium webdriver_manager yt-dlp ffmpeg-python elevenlabs google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
-   ```
-3. Alternative you can use a requirements file and just add all the packages in there and install all of them at once with:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
 
 ### API Keys and How to Get Them
 1. Sign up for the necessary APIs (Eleven Labs, OpenAI).  

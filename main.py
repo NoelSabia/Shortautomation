@@ -6,6 +6,7 @@ from visuals_gathering.get_visuals import VideoDownloader
 from shorts_fusion.capcut_merger import CapCutOrganizer
 from music_selection.selection import MusicSelection
 from shorts_fusion.upload_to_youtube import YoutubeUploader
+from subtitles_gathering.subtitles import SubtitleGenerator
 from pathlib import Path
 import shutil
 import sys
@@ -168,7 +169,7 @@ def main() -> None:
 		gpt = GPTCaller([main_org._path + "/script/script_german.txt", main_org._path + "/script/script_english.txt"], ["deutsch", "englisch"])
 		paths_to_scripts = gpt.rewrite(script)
 
-		# Call the get_voice function and call the get_song function for all the audio related stuff
+		# Do all the audio related stuff like generating the ai-voices, preparing the background_music
 		try:
 			audio = VoiceCaller(paths_to_scripts, [main_org._path + "/audio/output_german.mp3", main_org._path + "/audio/output_english.mp3"])
 			audio.get_voice()
@@ -179,20 +180,20 @@ def main() -> None:
 			main_org.check_if_error_exit(None)
 			return
 		
-		# Call the get_cc_vids function
+		# Get the subtitles as a .srt file to later use it with ffmpeg
 		try:
-			visual = VideoDownloader([main_org._path + "/visuals", main_org._path] , paths_to_scripts[1])
-			visual.download_visuals()
-			visual.select_visuals()
+			subtitles = SubtitleGenerator(["de", "en"], main_org._path)
+			subtitles.get_subtitles()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
 			return
 		
-		# Call the capcut_merger function (if full autiomation with videos are doable (is doable) this will be deprecated)
+		# Call the get_cc_vids function
 		try:
-			merger = CapCutOrganizer(main_org._path + "/uploads", main_org._browser)
-			merger.orchastrate_fusion()
+			visual = VideoDownloader([main_org._path + "/visuals", main_org._path] , paths_to_scripts[1])
+			visual.download_visuals()
+			visual.select_visuals()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
