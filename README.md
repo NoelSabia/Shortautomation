@@ -7,7 +7,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
   - [How to Install Python](#how-to-install-python)
   - [How to Set Up a Virtual Environment](#how-to-set-up-a-virtual-environment)
   - [How and What to Install via pip](#how-and-what-to-install-via-pip)
-  - [How to install wmctrl](#how-to-install-wmctrl)
+  - [How and What to Install via apt](#how-and-what-to-install-via-apt)
   - [API Keys and How to Get Them](#api-keys-and-how-to-get-them)
   - [How to make a capcut account](#How-to-make-a-capcut-account)
   - [How to get the JSONs to autoupload youtube shorts](#How-to-get-the-JSONs-to-autoupload-youtube-shorts)
@@ -48,13 +48,14 @@ A command-line program that streamlines creating short videos, shorts for YouTub
    pip install -r requirements.txt
    ```
 
-### How and What to Install via pip
+### How and What to Install apt 
 Just to adress the elephant in the room wmctrl is a command_line tool that controls windos.
 This in combination with feh, an image viewer, opens the possiblity to don't lose focus on the terminal and still be able to view every image and video.
 The same combination just with mpv instead of feh is used for videos.
+FFMPEG is then used for the fusion of the short and in some parts for the audio.
 For that install:
 ```bash
-   sudo apt install wmctrl feh mpv -y
+   sudo apt install wmctrl feh mpv ffmpeg -y
 ```
 
 ### API Keys and How to Get Them
