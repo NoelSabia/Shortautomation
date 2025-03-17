@@ -98,10 +98,3 @@ class SubtitleGenerator:
                 print(Fore.GREEN + f"Subtitle generation for {language} completed." + Style.RESET_ALL)
             except Exception as e:
                 print(Fore.RED + f"Error generating subtitles for {language}: {e}" + Style.RESET_ALL)
-
-def main() -> None:
-    subtitles = SubtitleGenerator(["de", "en"], "~/Documents/test")
-    subtitles.get_subtitles()
-
-if __name__ == "__main__":
-    main()

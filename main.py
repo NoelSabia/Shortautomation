@@ -3,9 +3,8 @@ from info_gathering.gpt_rewrite import GPTCaller
 from colorama import Fore, Style, init
 from voice_gathering.get_voice import VoiceCaller
 from visuals_gathering.get_visuals import VideoDownloader
-from shorts_fusion.capcut_merger import CapCutOrganizer
 from music_selection.selection import MusicSelection
-from shorts_fusion.upload_to_youtube import YoutubeUploader
+from yt_upload.upload_to_youtube import YoutubeUploader
 from subtitles_gathering.subtitles import SubtitleGenerator
 from pathlib import Path
 import shutil
