@@ -7,13 +7,15 @@ A command-line program that streamlines creating short videos, shorts for YouTub
   - [How to Install Python](#how-to-install-python)
   - [How to Set Up a Virtual Environment](#how-to-set-up-a-virtual-environment)
   - [How and What to Install via pip](#how-and-what-to-install-via-pip)
-  - [How and What to Install via apt](#how-and-what-to-install-via-apt)
+  - [How and What to Install via apt and git](#how-and-what-to-install-via-apt-and-git)
   - [API Keys and How to Get Them](#api-keys-and-how-to-get-them)
-  - [How to make a capcut account](#How-to-make-a-capcut-account)
   - [How to get the JSONs to autoupload youtube shorts](#How-to-get-the-JSONs-to-autoupload-youtube-shorts)
+
 - [How to Use This Command-Line Program](#how-to-use-this-command-line-program)
+
 - [How to Use the Master Command-Line Program](#how-to-use-the-master-command-line-program)
    - [How to change the program args file correctly](#how-to-change-the-program-args-file-correctly)
+
 - [What Channels are integrated](#what-channels-are-integrated)
 
 
@@ -48,7 +50,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
    pip install -r requirements.txt
    ```
 
-### How and What to Install apt 
+### How and What to Install via apt and git
 Just to adress the elephant in the room wmctrl is a command_line tool that controls windos.
 This in combination with feh, an image viewer, opens the possiblity to don't lose focus on the terminal and still be able to view every image and video.
 The same combination just with mpv instead of feh is used for videos.
@@ -56,6 +58,15 @@ FFMPEG is then used for the fusion of the short and in some parts for the audio.
 For that install:
 ```bash
    sudo apt install wmctrl feh mpv ffmpeg -y
+
+   #Then inside of the project Shortautomization in subtitles_gathering clone openai-whisper with http or ssh
+   cd subtitles_gathering
+
+   #ssh
+   git clone org-14957082@github.com:openai/whisper.git
+
+   #http
+   git clone https://github.com/openai/whisper.git
 ```
 
 ### API Keys and How to Get Them
