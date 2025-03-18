@@ -44,10 +44,10 @@ class GPTCaller:
 
 				# Print the generated text and ask the user if they want a rewrite
 				print(Fore.GREEN + f"\nGenerated Text:\n\n{completion.choices[0].message.content}" + Style.RESET_ALL)
-				user_input = input("\nDo you want a rewrite (y/n) or rewrite it yourself(r)? (y/n/r): ")
+				user_input = input("\nDo you want a rewrite (y/ENTER) or rewrite it yourself(r)? (y/ENTER/r): ")
 
 				# Check the user input if n then write the text to the file and break the loop
-				if user_input.lower() == 'n':
+				if user_input.lower() == "":
 					print(Fore.GREEN + f"\nAttemting to write it into {expanded_output_path}" + Style.RESET_ALL)
 					self._rewritten_text = completion.choices[0].message.content
 					with open(expanded_output_path, 'w') as file:
@@ -63,6 +63,6 @@ class GPTCaller:
 					print(Fore.GREEN + "\nScript saved to " + expanded_output_path + "" + Style.RESET_ALL)
 					break	
 				# If the user enters something else then ask again
-				elif user_input.lower() != 'n' and user_input.lower() != 'y':
+				elif user_input.lower() != "" and user_input.lower() != 'y':
 					print(Fore.YELLOW + "\nInvalid input. Please enter 'y' or 'n'." + Style.RESET_ALL)
 		return self._default_paths

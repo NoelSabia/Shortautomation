@@ -83,7 +83,7 @@ class SubtitleGenerator:
                 subprocess.run([
                     "whisper", 
                     full_input_path,
-                    "--model", "large",
+                    "--model", "turbo",
                     "--language", language,
                     "--device", "cpu",
                     "--output_dir", full_output_dir,

@@ -32,13 +32,9 @@ class Scraper:
 		scrape_text_results = []
 
 		# Loop through the websites in parallel
-		with ThreadPoolExecutor() as executor:
-			futures = [
-				executor.submit(self.__fetch_links_, website)
-				for website in self._targets
-			]
-			for future in as_completed(futures):
-				scrape_sublinks_result.extend(future.result())
+		for target in self._targets:
+			sublinks = self.__fetch_links_(target)
+			scrape_sublinks_result.extend(sublinks)
 
 		# If no sublinks are found then return
 		if len(scrape_sublinks_result) == 0:
@@ -96,9 +92,9 @@ class Scraper:
 		if raw_html.status_code == 200:
 			soup = BeautifulSoup(raw_html.text, 'html.parser')
 
-			 # for techcrunch
-			if not self._keywords and link == "https://techcrunch.com/":
-				main_section = soup.select_one("main.wp-block-group.is-layout-constrained.wp-block-group-is-layout-constrained")
+			# for techcrunch
+			if link == "https://techcrunch.com/":
+				main_section = soup.select_one("main")
 				if main_section:
 					links = main_section.find_all('a')
 					for a in links:
@@ -107,6 +103,7 @@ class Scraper:
 							href = urljoin(link, href)
 						if href and "/author" not in href and "/category" not in href and href not in sublinks and len(sublinks) < 20:
 							sublinks.append(href)
+
 			# for historydaily
 			elif not self._keywords and link == "https://www.historydaily.com/episodes/":
 				page_url = f"{link}?page={randint(1, 42)}"
@@ -130,6 +127,7 @@ class Scraper:
 										transcript_anchor = sub_soup.find('a', href='#transcript')
 										if transcript_anchor:
 											sublinks.append(href)
+
 			elif not self._keywords and link == "https://www.politico.eu/":
 					main_section = soup.select_one("main#main.main--front-page")
 					if main_section:
@@ -138,6 +136,7 @@ class Scraper:
 							href = a.get('href')
 							if href and href not in sublinks and len(sublinks) < 20:
 								sublinks.append(href)
+								
 			elif not self._keywords and link == "https://www.neverendingfootsteps.com/travel-guides/":
 				main_section = soup.select_one("main.vw-content-main")
 				if main_section:
@@ -145,8 +144,10 @@ class Scraper:
 					for link in links:
 						href = link.get('href')
 						sublinks.append(href)
+
 			else:
 				print(Fore.RED + "\nNo known website found. Please write your own scraper." + Style.RESET_ALL)
+
 		return sublinks
 
 	def __fetch_texts_(self, website: list[str], sublink: str) -> list[str]:
@@ -156,6 +157,7 @@ class Scraper:
         :return: List of paragraphs' text
         """
 		paragraphs_text = []
+
 		if sublink == "https://techcrunch.com/":
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -165,6 +167,7 @@ class Scraper:
 					paragraphs = main_content.find_all('p')
 					for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+
 		elif website[0] == "https://www.historydaily.com/episodes/":
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -172,6 +175,7 @@ class Scraper:
 				parapgraphs = soup.find_all('p')
 				for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+
 		elif website[0] == "https://www.politico.eu/":
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -179,6 +183,7 @@ class Scraper:
 				parapgraphs = soup.find_all('p')
 				for paragraph in paragraphs:
 						paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+
 		elif website[0] == "https://www.neverendingfootsteps.com/travel-guides/":
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -193,6 +198,7 @@ class Scraper:
 						paragraphs = sub_soup.find_all('p')
 						for paragraph in paragraphs:
 							paragraphs_text.append(paragraph.get_text(separator="\n", strip=True))
+
 		else:
 			raw_html = requests.get(sublink)
 			if raw_html.status_code == 200:
@@ -203,4 +209,5 @@ class Scraper:
 					text = paragraph.get_text(separator="\n", strip=True)
 					if text:
 						paragraphs_text.append(text)
+
 		return paragraphs_text

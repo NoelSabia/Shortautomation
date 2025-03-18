@@ -43,13 +43,15 @@ class VoiceCaller:
 		# Cycle trough all the keys and try each one of them until one works (needed if you only use the free api keys)
 		failed_api_keys = 0
 		for script, output_path in zip(self._script_to_voices, self._output_paths):
+			with open(os.path.expanduser(script), "r") as file:
+				file_content = file.read()
 			for api_key in valid_api_keys:
 				client = ElevenLabs(api_key=api_key)
 				try:
 					audio_generator = client.text_to_speech.convert(
 						voice_id= "JBFqnCBsd6RMkjVDRZzb", # this is the voice of George
 						output_format="mp3_44100_128",
-						text=script,
+						text=file_content,
 						model_id="eleven_multilingual_v2",
 						voice_settings={"stability": 1.0, "similarity_boost": 0.25, "style": 0.1}
 					)

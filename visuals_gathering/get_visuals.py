@@ -1,6 +1,7 @@
 import os
 import requests
 import subprocess
+import multiprocessing as mp
 from colorama import Fore, Style
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -24,6 +25,8 @@ class VideoDownloader:
 		:return:
 		"""
 		client = OpenAI()
+		with open(os.path.expanduser(self._script), "r") as file:
+			script_content = file.read()
 
 		# At first we get the search query in this format <word>%20<word2>%20<word3>
 		while True:
@@ -33,7 +36,7 @@ class VideoDownloader:
 					{"role": "system", "content": "You are someone who can summarize texts well."},
 					{
 						"role": "user",
-						"content": self._script + "\n\n-Summarize the text in one english word! No more, no less!"
+						"content": script_content + "\n\n-Summarize the text in one english word! No more, no less!"
 					}
 				]
 			)
@@ -138,7 +141,7 @@ class VideoDownloader:
 	
 	def download_visuals(self) -> None:
 		"""
-		Download videos and images from the URLs.
+		Download videos in parallel and images sequentially.
 		:return:
 		"""
 		self.get_query()
@@ -147,24 +150,36 @@ class VideoDownloader:
 		video_urls = self.get_video_urls()
 		image_urls = self.get_image_urls()
 		
-		# have correct path for the files
+		# Create directories
 		directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos")
 		directory_images = os.path.expanduser(f"{self._output_path[0]}/images")
+		os.makedirs(directory_videos, exist_ok=True)
+		os.makedirs(directory_images, exist_ok=True)
 		
-		# Download videos
-		print(Fore.GREEN + f"\nDownloading {len(video_urls)} videos" + Style.RESET_ALL)
-		for i, video in enumerate(video_urls):
-			if i == 15:
-				break
-			try:
-				ydl_opts = {'outtmpl': f'{directory_videos}/%(title)s.%(ext)s'}
-				with YoutubeDL(ydl_opts) as ydl:
-					ydl.download([video])
-			except Exception as e:
-				print(Fore.YELLOW + f"Error downloading video {video}: {e}" + Style.RESET_ALL)
+		# Download videos in parallel
+		print(Fore.GREEN + f"\nDownloading {min(len(video_urls), 15)} videos in parallel" + Style.RESET_ALL)
 		
-		# Download images
-		print(Fore.GREEN + f"\nDownloading {len(image_urls)} images" + Style.RESET_ALL)
+		# Limit to 15 videos and prepare processes
+		videos_to_download = video_urls[:15]
+		processes = []
+		
+		# Start a process for each video
+		for i, video in enumerate(videos_to_download):
+			p = mp.Process(
+				target=self.download_video_worker,
+				args=(video, directory_videos, i)
+			)
+			processes.append(p)
+			p.start()
+		
+		# Wait for all video downloads to complete
+		for p in processes:
+			p.join()
+		
+		print(Fore.GREEN + f"\nVideo downloads complete. Now downloading images..." + Style.RESET_ALL)
+		
+		# Download images sequentially (as they're faster)
+		print(Fore.GREEN + f"\nDownloading {min(len(image_urls), 15)} images" + Style.RESET_ALL)
 		for i, image in enumerate(image_urls):
 			if i == 15:
 				break
@@ -175,6 +190,8 @@ class VideoDownloader:
 					handler.write(image_data)
 			except Exception as e:
 				print(Fore.YELLOW + f"Error downloading image {image}: {e}" + Style.RESET_ALL)
+		
+		print(Fore.GREEN + f"\nAll downloads completed!" + Style.RESET_ALL)
 	
 	def calculate_visuals_needed(self) -> int:
 		path = os.path.expanduser(self._output_path[1]) + "/audio/cleaned_output_german.mp3"
@@ -209,6 +226,11 @@ class VideoDownloader:
 		return image_count
 
 	def get_all_videos(self) -> list[list[str]]:
+		"""
+		Gets all videos and cuts them into 3-second segments sequentially.
+		:return: List of lists, where each inner list contains segments from one original video
+		"""
+		
 		directory_videos = os.path.expanduser(f"{self._output_path[0]}/videos")
 		video_extension = {'.mp4'}
 		
@@ -223,62 +245,20 @@ class VideoDownloader:
 		if not os.path.exists(cut_directory):
 			os.makedirs(cut_directory)
 		
-		all_segments = []
+		# Process videos sequentially
+		print(Fore.GREEN + f"\nProcessing {len(video_files)} videos sequentially..." + Style.RESET_ALL)
 		
-		# Process each video
+		results = []
 		for video_file in video_files:
-			video_path = os.path.join(directory_videos, video_file)
-			video_name = os.path.splitext(video_file)[0]
-			
-			# Get video duration using ffprobe
-			result = subprocess.run([
-				"ffprobe", 
-				"-v", "error",
-				"-show_entries", "format=duration",
-				"-of", "default=noprint_wrappers=1:nokey=1",
-				video_path
-			], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-			
-			try:
-				duration = float(result.stdout.strip())
-				# Calculate number of 3-second segments
-				num_segments = int(duration / 3)
-				
-				segments_for_video = []
-				
-				# Cut video into 3-second segments
-				for i in range(num_segments):
-					start_time = i * 3
-					segment_name = f"{video_name}_segment_{i}.mp4"
-					output_path = os.path.join(cut_directory, segment_name)
-					
-					# Use ffmpeg to cut the segment - put -ss before input for better seeking
-					subprocess.run([
-						"ffmpeg",
-						"-y",  # Overwrite output file if it exists
-						"-ss", str(start_time),  # Moved to before input file
-						"-i", video_path,
-						"-t", "3",  # 3-second duration
-						# Remove copy mode to ensure accurate cutting
-						# "-c:v", "copy",
-						# "-c:a", "copy",
-						"-c:v", "libx264",  # Re-encode with h264 for accuracy
-						"-c:a", "aac",      # Re-encode audio 
-						"-loglevel", "error",  # Minimal logging
-						output_path
-					], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-					
-					segments_for_video.append(segment_name)
-				
-				# Add this video's segments to our main list
-				all_segments.append(segments_for_video)
-				print(Fore.GREEN + f"\nCut {video_file} into {len(segments_for_video)} segments." + Style.RESET_ALL)
-				
-			except (ValueError, subprocess.SubprocessError) as e:
-				print(Fore.YELLOW + f"\nError processing video {video_file}: {e}" + Style.RESET_ALL)
+			# Process each video one at a time
+			segments = self.process_video_segments(video_file, directory_videos, cut_directory)
+			results.append(segments)
+		
+		# Filter out empty lists (failed videos)
+		all_segments = [segments for segments in results if segments]
 		
 		# Return list of lists, where each inner list contains segments from one original video
-		if not all_segments:
+		if not all_segments and video_files:
 			# If no segments were created, return the original video files
 			return [video_files]
 		
@@ -336,7 +316,7 @@ class VideoDownloader:
 		
 		for final_image in final_image_list:
 			source_path = os.path.join(os.path.expanduser(f"{self._output_path[0]}/images"), final_image)
-			destination_path = os.path.expanduser(self._output_path[1]) + "/final_images/"
+			destination_path = os.path.expanduser(self._output_path[1]) + "/visuals/final_images/"
 			subprocess.run(["mv", source_path, destination_path])
 
 	def select_videos(self) -> None:
@@ -425,6 +405,69 @@ class VideoDownloader:
 			print("")
 			print(Fore.GREEN + f"Copied segment {final_segment} to final videos folder" + Style.RESET_ALL)
 
+	def download_video_worker(self, video_url, directory_videos, idx) -> bool:
+		"""Worker function for downloading a single video in a separate process"""
+		try:
+			ydl_opts = {'outtmpl': f'{directory_videos}/%(title)s.%(ext)s'}
+			with YoutubeDL(ydl_opts) as ydl:
+				ydl.download([video_url])
+			return True
+		except Exception as e:
+			print(Fore.YELLOW + f"Error downloading video {idx}: {video_url}: {e}" + Style.RESET_ALL)
+			return False
+
+	def process_video_segments(self, video_file, directory_videos, cut_directory) -> list[str]:
+		"""
+		Worker function to process a single video into segments
+		:return: list[str]
+		"""
+		
+		video_path = os.path.join(directory_videos, video_file)
+		video_name = os.path.splitext(video_file)[0]
+		segments_for_video = []
+		
+		# Get video duration using ffprobe
+		result = subprocess.run([
+			"ffprobe", 
+			"-v", "error",
+			"-show_entries", "format=duration",
+			"-of", "default=noprint_wrappers=1:nokey=1",
+			video_path
+		], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+		
+		try:
+			duration = float(result.stdout.strip())
+			# Calculate number of 3-second segments
+			num_segments = int(duration / 3)
+			
+			# Cut video into 3-second segments
+			for i in range(num_segments):
+				start_time = i * 3
+				segment_name = f"{video_name}_segment_{i}.mp4"
+				output_path = os.path.join(cut_directory, segment_name)
+				
+				# Use ffmpeg to cut the segment
+				subprocess.run([
+					"ffmpeg",
+					"-y",  # Overwrite output file if it exists
+					"-ss", str(start_time),
+					"-i", video_path,
+					"-t", "3",  # 3-second duration
+					"-c:v", "libx264",
+					"-c:a", "aac",
+					"-loglevel", "error",
+					output_path
+				], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+				
+				segments_for_video.append(segment_name)
+			
+			print(Fore.GREEN + f"\nCut {video_file} into {len(segments_for_video)} segments." + Style.RESET_ALL)
+			return segments_for_video
+			
+		except (ValueError, subprocess.SubprocessError) as e:
+			print(Fore.YELLOW + f"\nError processing video {video_file}: {e}" + Style.RESET_ALL)
+			return []
+
 	def select_visuals(self) -> None:
 		"""
 		Orchastrated the selection of the visuals
@@ -435,8 +478,8 @@ class VideoDownloader:
 		#this loop will allow the user to select other images and video if the threshold of needed visuals are not passed
 		while True:
 			if enough_visuals == None or enough_visuals.lower() == 'n':
-				# self.select_images()
+				self.select_images()
 				self.select_videos()
-			elif enough_visuals.lower() == 'y':
+			elif enough_visuals.lower() == "":
 				break
-			enough_visuals = input(Fore.GREEN + f"\nDo you have enough visuals(y) or want to look again over the materials(n)? (y/n): ")
+			enough_visuals = input(Fore.GREEN + f"\nDo you have enough visuals(ENTER) or want to look again over the materials(n)? (ENTER/n): ")

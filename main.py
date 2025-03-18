@@ -38,7 +38,7 @@ class Main_Organizer:
 		Create folders for the output files.
 		:return:
 		"""
-		print(Fore.GREEN + f"\nCreate folders for the output files called {self._path}/audio, {self._path}/visuals, {self._path}/visuals/images, {self._path}/visuals/videos {self._path}/script and {self._path}/upload" + Style.RESET_ALL)
+		print(Fore.GREEN + f"\nCreate folders for the output files called\n{self._path}/audio,\n{self._path}/visuals,\n{self._path}/visuals/images,\n{self._path}/visuals/videos,\n{self._path}/script\n{self._path}/upload" + Style.RESET_ALL)
 		directory = Path(f"{self._path}/audio").expanduser()
 		directory.mkdir(parents=True, exist_ok=True)
 		directory = Path(f"{self._path}/visuals").expanduser()
@@ -61,11 +61,11 @@ class Main_Organizer:
 		Get and validate sleep duration from user input
 		:return: Sleep duration in seconds
 		"""
-		DEFAULT_SLEEP = 30 * 60  # 30 minutes in seconds
+		DEFAULT_SLEEP = 0  # 0 minutes in seconds
 		MAX_SLEEP = 120 * 60     # 2 hours max sleep time
 		
 		try:
-			sleep_input = input("\nTime to sleep before cleaning up the resources (in minutes) or ENTER for default (30 min): ").strip()
+			sleep_input = input("\nTime to sleep before cleaning up the resources (in minutes) or ENTER for default (delete everything now): ").strip()
 			
 			# Handle empty input
 			if not sleep_input:
@@ -108,7 +108,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 		
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection"]:
+		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection", "yt_upload", "subtitles_gathering"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 	
@@ -136,7 +136,7 @@ class Main_Organizer:
 		shutil.rmtree(Path(self._path).expanduser(), ignore_errors=True)
 
 		# Remove all __pycache__ directories in voice_gathering and info_gathering and video_gathering
-		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection"]:
+		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection", "yt_upload", "subtitles_gathering"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 		sys.exit(0)
@@ -154,7 +154,7 @@ def main() -> None:
 		if len(args) < 2:
 			print(Fore.RED + "Usage of the program: python3 main.py <path_of_where_to_safe_it> <from here on websites to scrape> ..." + Style.RESET_ALL)
 			return
-		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[4:])
+		main_org = Main_Organizer(sys.argv[1], sys.argv[2], sys.argv[5:])
 		
 		# Call the create_folders function
 		main_org.create_folders()
@@ -197,10 +197,19 @@ def main() -> None:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
 			return
+
+		# Here we call the fusion class that uses ffmpeg to fuse everything from audio over subtitles over visuals together in one mp4 video.	
+		# try:
+		# 	fusion = ShortFusion()
+		# 	fusion.fuse() #(need to move the finished file into uploads with the names language_output.mp4)
+		# except Exception as e:
+		# 	print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+		# 	main_org.check_if_error_exit(None)
+		# 	return
 		
 		# Call the upload_to_youtube functions that automatically uploads the video as you like
 		try:
-			uploader = YoutubeUploader(main_org._path + "/uploads", sys.argv[3])
+			uploader = YoutubeUploader(main_org._path + "/uploads", [sys.argv[3], sys.argv[4]])
 			uploader.upload_to_youtube
 		except:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)

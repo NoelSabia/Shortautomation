@@ -32,6 +32,7 @@ class MusicSelection:
 		voice_files = [self._output_path / "cleaned_output_german.mp3", self._output_path / "cleaned_output_english.mp3"]
 		output_file_names = ["cut_song_german.mp3", "cut_song_english.mp3"]
 		duration = 0
+		cut_success = True  # Track if all cuts were successful
 
 		# Get the duration of the voice_audio to then cut the song to the same length
 		for voice_file, output_file_name in zip(voice_files, output_file_names):
@@ -63,12 +64,14 @@ class MusicSelection:
 			]
 			try:
 				subprocess.run(command, check=True)
-				# Delete original file only after successful cut
-				if os.path.exists(self._output_path / song):
-					os.remove(self._output_path / song)
-					print(Fore.GREEN + f"\nDeleted original file: {self._output_path / song}" + Style.RESET_ALL)
 			except subprocess.CalledProcessError as e:
 				print(Fore.RED + f"\nFailed to cut {song} to {duration} seconds." + Style.RESET_ALL)
+				cut_success = False
+		
+		# Delete original file only after all cuts are complete and successful
+		if cut_success and os.path.exists(self._output_path / song):
+			os.remove(self._output_path / song)
+			print(Fore.GREEN + f"\nDeleted original file: {self._output_path / song}" + Style.RESET_ALL)
 		
 	def get_song(self) -> str:
 		"""

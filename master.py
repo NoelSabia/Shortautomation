@@ -50,13 +50,13 @@ class MasterOrganizer:
 							block_browser = value
 						elif key == "website":
 							block_websites.append(value)
-						elif key == "youtube_german":
+						elif key == "youtube1" or key == "youtube_german":  # Accept both formats
 							if block_youtube_german is not None:
-								raise ValueError("Error: Block contains omre than one 'youtube'.")
+								raise ValueError("Error: Block contains more than one YouTube German parameter.")
 							block_youtube_german = value
-						elif key == "youtube_english":
+						elif key == "youtube2" or key == "youtube_english":  # Accept both formats
 							if block_youtube_english is not None:
-								raise ValueError("Error: Block contains omre than one 'youtube'.")
+								raise ValueError("Error: Block contains more than one YouTube English parameter.")
 							block_youtube_english = value
 
 				# Check for missing dir
@@ -95,29 +95,43 @@ class MasterOrganizer:
 				print(Fore.RED + f"\nInsufficient permissions to delete: {directory}" + Style.RESET_ALL)
 
 		# Remove __pycache__ directories
-		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection"]:
+		for folder in ["voice_gathering", "info_gathering", "visuals_gathering", "shorts_fusion", "music_selection", "subtitles_gathering", "yt_upload"]:
 			for pycache_dir in Path(folder).rglob("__pycache__"):
 				shutil.rmtree(pycache_dir, ignore_errors=True)
 
 		sys.exit(0)
 
-def main() -> None:
+def master() -> None:
 
-	# Create an instance of the MasterOrganizer class
-	master_org = MasterOrganizer()
-	master_org.load_args_into_master_org()
+    # Create an instance of the MasterOrganizer class
+    master_org = MasterOrganizer()
+    master_org.load_args_into_master_org()
 
-	# Register signal handlers using the instance method
-	signal.signal(signal.SIGINT, master_org.signal_handler)
-	signal.signal(signal.SIGTERM, master_org.signal_handler)
+    # Register signal handlers using the instance method
+    signal.signal(signal.SIGINT, master_org.signal_handler)
+    signal.signal(signal.SIGTERM, master_org.signal_handler)
 
-	# Run main.py with the paths and websites
-	for i, path in enumerate(master_org._directory):
-		print(Fore.GREEN + f"\nRunning main.py with path={path}, browser={master_org._browser[i]} and website(s)={master_org._websites[i]}" + Style.RESET_ALL)
-		websites = master_org._websites[i]
-		command = ["python3", "main.py", path, master_org._browser[i]] + websites
-		subprocess.run(command)  # wait for main.py to finish before proceeding
-		print(f"\nmain.py with path={path} and websites={websites} finished.")
+    # Run main.py with the paths, browser, YouTube links and websites
+    for i, path in enumerate(master_org._directory):
+        print(Fore.GREEN + f"\nRunning main.py with path={path},\nbrowser={master_org._browser[i]},\nYouTube German={master_org._youtube_german[i]},\nYouTube English={master_org._youtube_english[i]}\nand website(s)={master_org._websites[i]}" + Style.RESET_ALL)
+        
+        # Build command with all parameters
+        command = [
+            "python3", 
+            "main.py", 
+            path, 
+            master_org._browser[i] or "",
+            master_org._youtube_german[i] or "",
+            master_org._youtube_english[i] or ""
+        ]
+        
+        # Add all websites
+        command.extend(master_org._websites[i])
+        
+        # Run command
+        subprocess.run(command)
+        
+        print(Fore.GREEN + f"\nmain.py finished processing {path}." + Style.RESET_ALL)
 
 if __name__ == "__main__":
-	main()
+	master()
