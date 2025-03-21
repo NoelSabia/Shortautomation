@@ -87,7 +87,9 @@ class ShortFusion:
 				f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,"
 				f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p,"
 				f"loop=loop={60*image_duration}:size=1:start=0,"
-				f"zoompan=z='1+0.15*(on/{60*image_duration})':"
+				f"zoompan="
+				# “Ease in” zoom from 1.0× to ~1.2×, staying there
+				f"z='1 + 0.2*((1 - cos((on/{60*image_duration})*PI))/2)':"
 				f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':"
 				f"d={60*image_duration}:s={target_width}x{target_height}:fps=60,"
 				f"trim=duration={image_duration}[v{i}];"
