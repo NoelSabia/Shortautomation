@@ -80,27 +80,23 @@ class ShortFusion:
 			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
 		
 		# Process images - convert to video clips with duration
-		# Process images - convert to video clips with duration
-		# ...existing code...
 		for i in range(len(videos), total_inputs):
 			filter_complex += (
 				f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,"
 				f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p,"
 				f"loop=loop={60*image_duration}:size=1:start=0,"
-				f"zoompan="
-				# “Ease in” zoom from 1.0× to ~1.2×, staying there
-				f"z='1 + 0.2*((1 - cos((on/{60*image_duration})*PI))/2)':"
+				f"zoompan=z='1 + 0.2*(1 - exp(-3*(on/{60*image_duration})))':"
 				f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':"
-				f"d={60*image_duration}:s={target_width}x{target_height}:fps=60,"
+				f"d={60*image_duration}:s={target_width}x{target_height}:fps=30,"
 				f"trim=duration={image_duration}[v{i}];"
 			)
-		# ...existing code...
 
 		# Concatenate all streams
 		for i in range(total_inputs):
 			filter_complex += f"[v{i}]"
 		
-		filter_complex += f"concat=n={total_inputs}:v=1:a=0[outv]"
+		# Add a space before 'concat'
+		filter_complex += f" concat=n={total_inputs}:v=1:a=0[outv]"
 		
 		# Construct the command
 		command = [
