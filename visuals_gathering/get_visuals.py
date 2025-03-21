@@ -194,6 +194,7 @@ class VideoDownloader:
 		print(Fore.GREEN + f"\nAll downloads completed!" + Style.RESET_ALL)
 	
 	def calculate_visuals_needed(self) -> int:
+		buffer = 2
 		path = os.path.expanduser(self._output_path[1]) + "/audio/cleaned_output_german.mp3"
 		result = subprocess.run(
 			[
@@ -209,7 +210,7 @@ class VideoDownloader:
 		)
 		try:
 			tmp_duration = float(result.stdout.strip())
-			duration = int(int(tmp_duration) / 3)
+			duration = int(int(tmp_duration) / 3) + buffer
 			return duration
 		except ValueError:
 			print(Fore.YELLOW + "Could not retrieve duration." + Style.RESET_ALL)
@@ -391,11 +392,6 @@ class VideoDownloader:
 					else:
 						print(Fore.YELLOW + f"\nInput '{user_input}' not recognized as a command, use y, n, or s." + Style.RESET_ALL)
 						user_input = input(Fore.GREEN + "\nUse segment(y), skip it(n), or skip all segments from this source(s)? (y/n/s): " + Style.RESET_ALL)
-
-		# Create the destination directory if it doesn't exist
-		destination_dir = os.path.expanduser(self._output_path[1]) + "/final_videos/"
-		if not os.path.exists(destination_dir):
-			os.makedirs(destination_dir)
 
 		# Move the selected segments to the final_videos folder
 		for final_segment in final_segments_list:

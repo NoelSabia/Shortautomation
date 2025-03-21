@@ -6,6 +6,7 @@ from visuals_gathering.get_visuals import VideoDownloader
 from music_selection.selection import MusicSelection
 from yt_upload.upload_to_youtube import YoutubeUploader
 from subtitles_gathering.subtitles import SubtitleGenerator
+from shorts_fusion.shorts_fusion import ShortFusion
 from pathlib import Path
 import shutil
 import sys
@@ -199,25 +200,25 @@ def main() -> None:
 			return
 
 		# Here we call the fusion class that uses ffmpeg to fuse everything from audio over subtitles over visuals together in one mp4 video.	
-		# try:
-		# 	fusion = ShortFusion()
-		# 	fusion.fuse() #(need to move the finished file into uploads with the names language_output.mp4)
-		# except Exception as e:
-		# 	print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
-		# 	main_org.check_if_error_exit(None)
-		# 	return
+		try:
+			fusion = ShortFusion(main_org._path)
+			fusion.orchastrate_fusion() #(need to move the finished file into uploads with the names language_output.mp4)
+		except Exception as e:
+			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
+			main_org.check_if_error_exit(None)
+			return
 		
 		# Call the upload_to_youtube functions that automatically uploads the video as you like
 		try:
 			uploader = YoutubeUploader(main_org._path + "/uploads", [sys.argv[3], sys.argv[4]])
 			uploader.upload_to_youtube
-		except:
+		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
 			return
 		
 		# Clean up the resources
-		main_org.clean_up_everything()
+		# main_org.clean_up_everything()
 
 	except KeyboardInterrupt:
 		pass
