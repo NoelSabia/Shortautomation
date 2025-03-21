@@ -80,9 +80,15 @@ class ShortFusion:
 			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
 		
 		# Process images - convert to video clips with duration
+		# Process images - convert to video clips with duration
 		for i in range(len(videos), total_inputs):
-			# For images: scale, pad, and extend duration using fps and PTS manipulation
-			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p,fps=30,tpad=stop_mode=clone:stop_duration={image_duration}[v{i}];"
+			# For images: Create a 3-second clip with smooth zoom from center
+			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1," + \
+							  f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p," + \
+							  f"loop=loop={60*image_duration}:size=1:start=0," + \
+							  f"scale=iw*'(1+0.15*t/{image_duration})':ih*'(1+0.15*t/{image_duration})':eval=frame,setpts=PTS-STARTPTS," + \
+							  f"crop={target_width}:{target_height}:iw/2-{target_width}/2:ih/2-{target_height}/2," + \
+							  f"fps=60,trim=duration={image_duration}[v{i}];"
 
 		# Concatenate all streams
 		for i in range(total_inputs):
