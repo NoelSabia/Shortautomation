@@ -50,38 +50,58 @@ class ShortFusion:
 		# Get all images and videos
 		images = self.get_all_images()
 		videos = self.get_all_videos()
-	
+		
 		final_visual_output = os.path.join(self._videos_dir, "final_visual.mp4")
 		
 		# Target vertical video format (for shorts/reels)
 		target_width = 720
 		target_height = 1280
 		
-		# make the command to concatenate all videos
-		all_videos = []
-		for video in videos:
-			all_videos.extend(["-i", os.path.join(self._videos_dir, video)])
+		# Define image duration in seconds
+		image_duration = 3  # Change this to your preferred duration
 		
-		# Apply filters and concatenate the scaled videos only (no audio)
+		# Prepare inputs for both videos and images
+		inputs = []
 		filter_complex = ""
-		for i in range(len(videos)):
-			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2[v{i}];"
-		for i in range(len(videos)):
-			filter_complex += f"[v{i}]"
-		filter_complex += f"concat=n={len(videos)}:v=1:a=0[outv]"  # a=0 means no audio output
 		
-		# Construct the complete ffmpeg command
+		# Add video inputs
+		for video in videos:
+			inputs.extend(["-i", os.path.join(self._videos_dir, video)])
+		
+		# Add image inputs
+		for image in images:
+			inputs.extend(["-i", os.path.join(self._images_dir, image)])
+		
+		# Total number of inputs
+		total_inputs = len(videos) + len(images)
+		
+		# Process videos first
+		for i in range(len(videos)):
+			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
+		
+		# Process images - convert to video clips with duration
+		for i in range(len(videos), total_inputs):
+			# For images: scale, pad, and extend duration using fps and PTS manipulation
+			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p,fps=30,tpad=stop_mode=clone:stop_duration={image_duration}[v{i}];"
+
+		# Concatenate all streams
+		for i in range(total_inputs):
+			filter_complex += f"[v{i}]"
+		
+		filter_complex += f"concat=n={total_inputs}:v=1:a=0[outv]"
+		
+		# Construct the command
 		command = [
 			"ffmpeg", "-y",
-			*all_videos,
+			*inputs,
 			"-filter_complex", filter_complex,
 			"-map", "[outv]",
-			# Remove "-map", "[outa]" line completely
 			"-c:v", "libx264",
-			"-an",  # This disables audio
+			"-pix_fmt", "yuv420p",
+			"-an",
 			final_visual_output
 		]
-
+		
 		# Execute the command
 		print(Fore.GREEN + "\nExecuting ffmpeg command..." + Style.RESET_ALL)
 		video = subprocess.run(
@@ -90,10 +110,10 @@ class ShortFusion:
 			stderr=subprocess.PIPE,
 			text=True
 		)
-	
+		
 		# Logging to check if it worked or not
 		if video.returncode != 0:
-			print(Fore.RED + f"\nError concatinating video and images!" + Style.RESET_ALL)
+			print(Fore.RED + f"\nError concatenating video and images: {video.stderr}" + Style.RESET_ALL)
 		else:
 			print(Fore.GREEN + f"\nSuccessfully created video!" + Style.RESET_ALL)
 		
