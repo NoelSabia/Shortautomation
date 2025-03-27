@@ -54,14 +54,14 @@ class ShortFusion:
 		final_visual_output = os.path.join(self._videos_dir, "final_visual.mp4")
 		
 		# Target vertical video format (for shorts/reels)
-		target_width = 720
-		target_height = 1280
+		target_width = 350
+		target_height = 600
 		
 		# Define image duration in seconds and prepare inputs for both videos and images
 		image_duration = 3
 		inputs = []
 		filter_complex = ""
-
+	
 		# Add video inputs
 		for video in videos:
 			inputs.extend(["-i", os.path.join(self._videos_dir, video)])
@@ -77,7 +77,7 @@ class ShortFusion:
 		for i in range(len(videos)):
 			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
 		
-		# Process images - convert to video clips with duration
+		# Process images with Ken Burns style effect (non-linear zoom)
 		for i in range(len(videos), total_inputs):
 			filter_complex += (
 				f"[{i}:v]scale=8000:-1," # Scale to high resolution first for better zoom quality
