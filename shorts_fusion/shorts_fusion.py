@@ -212,7 +212,7 @@ class ShortFusion:
 					"-y",
 					"-i", video,
 					"-i", audio,
-					"-vf", f"subtitles={subtitle_path}",
+					"-vf", f"subtitles={subtitle_path}:force_style='Fontname=Arial,FontSize=16,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=100'",
 					"-map", "0:v:0?",
 					"-map", "1:a:0",
 					"-c:v", "libx264",
