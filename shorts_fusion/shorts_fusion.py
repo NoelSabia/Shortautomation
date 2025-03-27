@@ -42,7 +42,7 @@ class ShortFusion:
 		]
 		return video_files
 	
-	def video_fusion(self) -> str:
+	def generate_video(self) -> str:
 		"""
 		Fuses videos and images into a single video with transitions
 		:return: str - paths to the final video files
@@ -57,13 +57,11 @@ class ShortFusion:
 		target_width = 720
 		target_height = 1280
 		
-		# Define image duration in seconds
-		image_duration = 3  # Change this to your preferred duration
-		
-		# Prepare inputs for both videos and images
+		# Define image duration in seconds and prepare inputs for both videos and images
+		image_duration = 3
 		inputs = []
 		filter_complex = ""
-		
+
 		# Add video inputs
 		for video in videos:
 			inputs.extend(["-i", os.path.join(self._videos_dir, video)])
@@ -82,20 +80,16 @@ class ShortFusion:
 		# Process images - convert to video clips with duration
 		for i in range(len(videos), total_inputs):
 			filter_complex += (
-				f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,"
-				f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p,"
-				f"loop=loop={60*image_duration}:size=1:start=0,"
-				f"zoompan=z='1 + 0.2*(1 - exp(-3*(on/{60*image_duration})))':"
-				f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':"
-				f"d={60*image_duration}:s={target_width}x{target_height}:fps=30,"
-				f"trim=duration={image_duration}[v{i}];"
+				f"[{i}:v]scale=8000:-1," # Scale to high resolution first for better zoom quality
+				f"zoompan=z='zoom+0.001':x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2):"
+				f"d={60 * image_duration}:s={target_width}x{target_height}:fps=60,"
+				f"trim=duration={image_duration},"
+				f"format=yuv420p,setsar=1:1[v{i}];"
 			)
 
 		# Concatenate all streams
 		for i in range(total_inputs):
 			filter_complex += f"[v{i}]"
-		
-		# Add a space before 'concat'
 		filter_complex += f" concat=n={total_inputs}:v=1:a=0[outv]"
 		
 		# Construct the command
@@ -111,7 +105,6 @@ class ShortFusion:
 		]
 		
 		# Execute the command
-		print(Fore.GREEN + "\nExecuting ffmpeg command..." + Style.RESET_ALL)
 		video = subprocess.run(
 			command,
 			stdout=subprocess.PIPE,
@@ -126,6 +119,51 @@ class ShortFusion:
 			print(Fore.GREEN + f"\nSuccessfully created video!" + Style.RESET_ALL)
 		
 		return final_visual_output
+	
+	def video_fusion(self) -> list[str]:
+		"""
+		Cuts the main video in the right length for the different audios
+		:return: list[str]
+		"""
+		path_to_video = self.generate_video()
+		audio_paths = [os.path.join(self._audio_dir, "merged_german.mp3"), os.path.join(self._audio_dir, "merged_english.mp3")]
+		output_file_names = [os.path.join(self._videos_dir, "final_video_german.mp4"), os.path.join(self._videos_dir, "final_video_english.mp4")]
+		duration = 0
+
+		# Get the duration of the audios to then cut the video to the same length
+		for audio, output_file_name in zip(audio_paths, output_file_names):
+			result = subprocess.run(
+				[
+					"ffprobe",
+					"-v", "error",
+					"-show_entries", "format=duration",
+					"-of", "default=noprint_wrappers=1:nokey=1",
+					audio
+				],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				text=True
+			)
+			try:
+				tmp_duration = float(result.stdout.strip())
+				duration = int(tmp_duration)
+			except ValueError:
+				print("Could not retrieve duration.")
+			
+			# Cut the video to the duration of the audio
+			command = [
+				"ffmpeg",
+				"-i", path_to_video,
+				"-t", str(duration),
+				"-y",
+				output_file_name
+			]
+			try:
+				subprocess.run(command, check=True)
+			except subprocess.CalledProcessError as e:
+				print(Fore.RED + f"\nFailed to cut {path_to_video} to {duration} seconds." + Style.RESET_ALL)
+
+		return output_file_names
 
 	def audio_fusion(self) -> list[str]:
 		"""
@@ -162,17 +200,42 @@ class ShortFusion:
 		
 		return final_audio_output
 	
+	def fusion_visuals_and_audio(self, videos: list[str], audios: list[str]) -> None:
+		subtitle_paths = [os.path.join(self._subtitles_dir, "cleaned_output_german.srt"), os.path.join(self._subtitles_dir, "cleaned_output_english.srt")]
+		output_paths = [os.path.join(self._output_dir, "german_video.mp4"), os.path.join(self._output_dir, "english_video.mp4")]
+		print(videos)
+		print(audios)
+		for video, audio, output_path, subtitle_path in zip(videos, audios, output_paths, subtitle_paths):
+			subprocess.run(
+				[
+					"ffmpeg",
+					"-y",
+					"-i", video,
+					"-i", audio,
+					"-vf", f"subtitles={subtitle_path}",
+					"-map", "0:v:0?",
+					"-map", "1:a:0",
+					"-c:v", "libx264",
+					"-c:a", "aac",
+					"-shortest",
+					output_path
+				]
+			)
+	
 	def orchestrate_fusion(self) -> None:
 		"""
 		Simplified orchestration that only processes videos and images
 		:return:
 		"""
+		print(Fore.GREEN + "\nStarting audio fusion..." + Style.RESET_ALL)
+		audio = self.audio_fusion()
+		print(Fore.GREEN + "\nFinished audio fusion." + Style.RESET_ALL)
 		print(Fore.GREEN + "\nStarting video fusion..." + Style.RESET_ALL)
 		video = self.video_fusion()
 		print(Fore.GREEN + "\nFinished video fusion." + Style.RESET_ALL)
-		print(Fore.GREEN + "\nStarting audio fusion..." + Style.RESET_ALL)
-		audio = self.audio_fusion()
-		print(Fore.GREEN + "\nFinished audio fusion." + Style.RESET_ALL)		
+		print(Fore.GREEN + "\nStarting putting video and audio together to the upload it..." + Style.RESET_ALL)
+		self.fusion_visuals_and_audio(video, audio)
+		print(Fore.GREEN + "\nFinished the fusion, next step will be uploading." + Style.RESET_ALL)
 
 def main() -> None:
 	fusion = ShortFusion("~/Documents/technews")
