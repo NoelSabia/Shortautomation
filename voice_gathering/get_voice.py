@@ -49,7 +49,7 @@ class VoiceCaller:
 				client = ElevenLabs(api_key=api_key)
 				try:
 					audio_generator = client.text_to_speech.convert(
-						voice_id= "JBFqnCBsd6RMkjVDRZzb", # this is the voice of George
+						voice_id= "TX3LPaxmHKxFdv7VOQHJ", # this is the voice of Liam
 						output_format="mp3_44100_128",
 						text=file_content,
 						model_id="eleven_multilingual_v2",

@@ -18,7 +18,7 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 TOKEN_FILE = 'token.json'
 
 class YoutubeUploader:
-    def init(self, output_path: str, path_to_client_json: list[str]) -> None:
+    def __init__(self, output_path: str, path_to_client_json: list[str]) -> None:
         self._output_path = output_path
         self._path_to_client_json = path_to_client_json
     

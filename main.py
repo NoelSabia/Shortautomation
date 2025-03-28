@@ -202,7 +202,7 @@ def main() -> None:
 		# Here we call the fusion class that uses ffmpeg to fuse everything from audio over subtitles over visuals together in one mp4 video.	
 		try:
 			fusion = ShortFusion(main_org._path)
-			fusion.orchastrate_fusion() #(need to move the finished file into uploads with the names language_output.mp4)
+			fusion.orchestrate_fusion() #(need to move the finished file into uploads with the names language_output.mp4)
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
