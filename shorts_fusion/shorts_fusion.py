@@ -1,5 +1,6 @@
 import os
 import subprocess
+import random
 from colorama import Fore, Style
 
 class ShortFusion:
@@ -61,31 +62,57 @@ class ShortFusion:
 		image_duration = 3
 		inputs = []
 		filter_complex = ""
-	
-		# Add video inputs
-		for video in videos:
-			inputs.extend(["-i", os.path.join(self._videos_dir, video)])
-		
-		# Add image inputs
-		for image in images:
-			inputs.extend(["-i", os.path.join(self._images_dir, image)])
-		
-		# Total number of inputs
-		total_inputs = len(videos) + len(images)
-		
-		# Process videos first
-		for i in range(len(videos)):
-			filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
-		
-		# Process images with Ken Burns style effect (non-linear zoom)
-		for i in range(len(videos), total_inputs):
-			filter_complex += (
-				f"[{i}:v]scale=8000:-1," # Scale to high resolution first for better zoom quality
-				f"zoompan=z='zoom+0.001':x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2):"
-				f"d={60 * image_duration}:s={target_width}x{target_height}:fps=60,"
-				f"trim=duration={image_duration},"
-				f"format=yuv420p,setsar=1:1[v{i}];"
-			)
+
+		# Create a sequence of media to use e.g. [video, video, image, video]
+		media_sequence = []
+		if len(videos) < 3:
+			print(Fore.YELLOW + f"\nWarning: Fewer than 3 videos available ({len(videos)} found). Using all available videos." + Style.RESET_ALL)
+			for video in videos:
+				media_sequence.append(("video", video))
+		else:
+			for i in range(3):
+				media_sequence.append(("video", videos[i]))
+			remaining_videos = videos[3:]
+			remaining_media = []
+			for video in remaining_videos:
+				remaining_media.append(("video", video))
+			for image in images:
+				remaining_media.append(("image", image))
+			
+			# Shuffle the remaining media and add to sequence
+			random.shuffle(remaining_media)
+			media_sequence.extend(remaining_media)
+				
+		# Process the media sequence
+		for idx, (media_type, file_name) in enumerate(media_sequence):
+			if media_type == "video":
+				inputs.extend(["-i", os.path.join(self._videos_dir, file_name)])
+			else:
+				inputs.extend(["-i", os.path.join(self._images_dir, file_name)])
+
+		# Total number of inputs is the length of the media sequence
+		total_inputs = len(media_sequence)
+
+		# First, set up a counter for each type
+		video_count = 0
+		image_count = 0
+
+		# Process each input based on its media type and position in sequence
+		for i, (media_type, _) in enumerate(media_sequence):
+			if media_type == "video":
+				# Process this specific video
+				filter_complex += f"[{i}:v]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,setsar=1:1,pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p[v{i}];"
+				video_count += 1
+			else:
+				# Process this specific image with Ken Burns style effect
+				filter_complex += (
+					f"[{i}:v]scale=8000:-1,"
+					f"zoompan=z='zoom+0.001':x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2):"
+					f"d={60 * image_duration}:s={target_width}x{target_height}:fps=60,"
+					f"trim=duration={image_duration},"
+					f"format=yuv420p,setsar=1:1[v{i}];"
+				)
+				image_count += 1
 
 		# Concatenate all streams
 		for i in range(total_inputs):
@@ -212,7 +239,7 @@ class ShortFusion:
 					"-y",
 					"-i", video,
 					"-i", audio,
-					"-vf", f"subtitles={subtitle_path}:force_style='Fontname=Arial,FontSize=16,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=100'",
+					"-vf", f"subtitles={subtitle_path}:force_style='Fontname=Arial,FontSize=16,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=90'",
 					"-map", "0:v:0?",
 					"-map", "1:a:0",
 					"-c:v", "libx264",
