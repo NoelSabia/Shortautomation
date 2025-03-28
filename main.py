@@ -218,7 +218,7 @@ def main() -> None:
 			return
 		
 		# Clean up the resources
-		# main_org.clean_up_everything()
+		main_org.clean_up_everything()
 
 	except KeyboardInterrupt:
 		pass

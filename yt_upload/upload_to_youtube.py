@@ -81,8 +81,8 @@ class YoutubeUploader:
         """
         print(Fore.GREEN + f"\nUploading output files to YouTube" + Style.RESET_ALL)
 
-        languages = ["deutsch", "englisch"]
-        mp4_names = ["german_output.mp4", "english_output.mp4"]
+        languages = ["german", "english"]
+        mp4_names = ["german_video.mp4", "english_video.mp4"]
         for i, account, language, mp4_name in enumerate(zip(self._path_to_client_json, languages, mp4_names)):
             print(Fore.GREEN + f"\nUpload started for video {i} of {len(languages)}." + Style.RESET_ALL)
             youtube = self.authenticate_youtube(account)
