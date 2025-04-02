@@ -7,6 +7,7 @@ from openai import OpenAI
 import google_auth_httplib2
 import google_auth_oauthlib
 import googleapiclient.discovery
+import datetime
 import googleapiclient.errors
 import googleapiclient.http
 from dotenv import load_dotenv
@@ -30,9 +31,33 @@ class YoutubeUploader:
         flow.redirect_uri = "http://localhost:8080/"
         credentials = flow.run_local_server(port=8080)
         return googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
+    
+    def get_future_date(self) -> str:
+        """
+        Prompts the user for input between 0 and 6, where 0 represents today
+        and 6 represents one week from today. Returns the corresponding date.
+        """
+        while True:
+            try:
+                days_input = input("Enter a number between 0 and 6 (0 for today, 6 for one week from today): ")
+                days = int(days_input)
+                if 0 <= days <= 6:
+                    today = datetime.date.today()
+                    future_date = today + datetime.timedelta(days=days)
+                    return future_date
+                else:
+                    print(Fore.YELLOW + "Please enter a number between 0 and 6." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "Invalid input. Please enter a number." + Style.RESET_ALL)
+                today = datetime.date.today()
+                return today
 
     def upload_video(self, youtube, language, mp4_name) -> None:
+        """
+        Uploads the video to youtube
+        """
         client = OpenAI()
+        get_upload_date = self.get_future_date()
         completion = client.chat.completions.create(
             model="gpt-4o-mini-2024-07-18",
             messages=[
@@ -51,7 +76,8 @@ class YoutubeUploader:
                 "tags": ["shorts", "trending", "viral", "fyp", "breakingnews", "historyfacts","worldnews", "currentevents", "politicalnews", "headlines", "dailyupdate","historylovers", "didyouknow", "historybuff", "onthisday","traveltips", "travelvlog", "hiddenplaces", "amazingdestinations"]
             },
             "status":{
-                "privacyStatus": "private"
+                "privacyStatus": "private",
+                "publishAt": f"{get_upload_date}T10:00:00Z"
             }
         }
         #use "publishAt": "2023-12-31T12:00:00Z" to schedule the video. use it directly! under the privacyStatus in status

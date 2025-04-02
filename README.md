@@ -33,7 +33,7 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 1. Navigate to the project folder in your terminal.  
 2. Create and activate a virtual environment:  
    ```bash
-   python -m venv .venv
+   python3 -m venv .venv &&
    source .venv/bin/activate
    ```
 
@@ -42,10 +42,6 @@ A command-line program that streamlines creating short videos, shorts for YouTub
 ### How and What to Install via pip
 1. Ensure you’re in the virtual environment.  
 2. Install dependencies and ffmpeg on your system:  
-   ```bash
-   pip install colorama openai dotenv requests bs4 selenium webdriver_manager yt-dlp ffmpeg-python elevenlabs google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client imageio==2.4.1 librosa==0.10.1 hydra-core==1.3.2 moviepy==0.2.3.5 numpy==1.23.5 torch transformers==4.35.2 openai-whisper
-   ```
-3. Alternative you can use a requirements in the root of the repository and install everything in one go:
    ```bash
    pip install -r requirements.txt
    ```

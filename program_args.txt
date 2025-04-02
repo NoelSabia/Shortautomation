@@ -3,15 +3,3 @@ browser="firefox"
 youtube1="ShortautomizationNews_german.json"
 youtube2="ShortautomizationNews_english.json
 website="https://techcrunch.com/"
-
-dir="~/Documents/history"
-browser="firefox"
-youtube_german=""
-youtube_english=""
-website="https://www.historydaily.com/episodes/"
-
-dir="~/Documents/politics"
-browser="firefox"
-youtube_german=""
-youtube_english=""
-website="https://www.politico.eu/"
