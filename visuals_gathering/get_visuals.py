@@ -188,8 +188,8 @@ class VideoDownloader:
 		"""
 		Worker to download 
 		"""
-		subprocess.run(["ffmpeg", "-i", video_url, "-c", "copy", os.path.join(directory_videos, f"/videos/output{index}.mp4")])
-
+		expanded_directory = os.path.expanduser(directory_videos)
+		subprocess.run(["ffmpeg", "-i", video_url, "-c", "copy", os.path.join(expanded_directory, f"videos/output{index}.mp4")])
 	
 	def download_visuals(self) -> None:
 		"""
