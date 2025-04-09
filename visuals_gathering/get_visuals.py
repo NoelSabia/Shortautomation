@@ -14,8 +14,10 @@ class VideoDownloader:
 	def __init__(self, output_path: list[str], script: str) -> None:
 		self._output_path = output_path
 		self._script = script
-		self._query = []
-		self._rapid_api_key = os.environ['RAPIDAPI-KEY']
+		self._query_twitter = []
+		self._query_pinterest = []
+		self._rapid_api_key_twitter = os.environ['RAPIDAPI_KEY']
+		self._rapid_api_key_pinterest = os.environ['PINTEREST_KEY']
 		self._number_of_picked_visuals = 0
 		self._needed_visuals = self.calculate_visuals_needed()
 	
@@ -24,15 +26,27 @@ class VideoDownloader:
 		Get the search query from the user and set it as the query attribute.
 		:return:
 		"""
+		delimiter = "%20"
+
+		# get the keywords
 		print(Fore.GREEN + "\nStart scraping..." + Style.RESET_ALL)
 		while True:
 			query_part = input(Fore.GREEN + "\nFor what should we scrape, leave empty to exit and use '%20' to concat words: " + Style.RESET_ALL)
 			if query_part == "":
 				break
 			else:
-				self._query.append(query_part)
+				self._query_twitter.append(query_part)
 
-	def get_video_urls(self) -> list:
+		# cut the keywords so that it's also usable for pinterest
+		for query in self._query_twitter:
+			if delimiter not in query:
+				self._query_pinterest.append(query)
+			else:
+				splitted_words = query.split("%20")
+				query_for_pinterest = " ".join(splitted_words)
+				self._query_pinterest.append(query_for_pinterest)
+
+	def get_video_urls_twitter(self) -> list:
 		"""
 		Get video URLs from the Twitter API.
 		:return: List of video URLs
@@ -40,10 +54,10 @@ class VideoDownloader:
 		video_urls = []
 
 		# Prepare the request with search query and api key and then get the json data for videos
-		for query in self._query:
+		for query in self._query_twitter:
 			url = f"https://twttrapi.p.rapidapi.com/search-videos?query={query}"
 			headers = {
-				"x-rapidapi-key": f"{self._rapid_api_key}",
+				"x-rapidapi-key": f"{self._rapid_api_key_twitter}",
 				"x-rapidapi-host": "twttrapi.p.rapidapi.com"
 			}
 
@@ -81,10 +95,10 @@ class VideoDownloader:
 		image_urls = []
 
 		#Prepare the request with search query and api key and then get the json data for images
-		for query in self._query:
+		for query in self._query_twitter:
 			url = f"https://twttrapi.p.rapidapi.com/search-images?query={query}"
 			headers = {
-				"x-rapidapi-key": f"{self._rapid_api_key}",
+				"x-rapidapi-key": f"{self._rapid_api_key_twitter}",
 				"x-rapidapi-host": "twttrapi.p.rapidapi.com"
 			}
 
@@ -111,6 +125,72 @@ class VideoDownloader:
 		# return the list with all the links in them
 		return image_urls
 	
+	def  get_video_urls_pinterest(self) -> None:
+		"""
+		Get videos from Pinterest.
+		:return:
+		"""
+
+		for query in self._query_pinterest:
+			# Prepare everything for the request
+			url = "https://unofficial-pinterest-api.p.rapidapi.com/pinterest/videos/relevance"
+			querystring = {"keyword":f"{query}","num":"25"}
+			headers = {
+				"x-rapidapi-key": "5e5d3ec5famsh2076f22fa9376dfp1bd29fjsn86c5f45d228b",
+				"x-rapidapi-host": "unofficial-pinterest-api.p.rapidapi.com"
+			}
+
+			# Get the response and make some checks before converting it to a json()
+			response = requests.get(url, headers=headers, params=querystring)
+			if response.status_code != 200:
+				print(Fore.RED + "\nLimit reached for this month for this api" + Style.RESET_ALL)
+			
+			# extract all videos from response
+			video_urls = []
+
+			# Get the data array from the response
+			try:
+				response_json = response.json()
+				entries = response_json["data"]
+
+				for i, entry in enumerate(entries):
+					try:
+						# Extract the m3u8 URL from the entry
+						m3u8_url = entry["videos"]["video_list"]["V_HLSV4"]["url"]
+						
+						# Replace "hls" with "720p" and "m3u8" with "mp4"
+						video_url = m3u8_url.replace("hls", "720p").replace("m3u8", "mp4")
+						
+						# Add to video_urls list
+						video_urls.append(video_url)
+					except KeyError as e:
+						print(f"KeyError for entry {i}: {e}")
+					except Exception as e:
+						print(f"Error processing entry {i}: {e}")
+			except Exception as e:
+				print(Fore.RED + "\nCould not retrieve data from pinterest" + Style.RESET_ALL)
+
+			#download the videos in parallel
+			processes = []
+			for i, video in enumerate(video_urls):
+				p = mp.Process(
+					target=self.download_videos_worker,
+					args=(video, self._output_path[0], i)
+				)
+				processes.append(p)
+				p.start()
+			
+			# Wait for all video downloads to complete
+			for p in processes:
+				p.join()
+
+	def download_videos_worker(self, video_url: str, directory_videos: str, index: int) -> None:
+		"""
+		Worker to download 
+		"""
+		subprocess.run(["ffmpeg", "-i", video_url, "-c", "copy", os.path.join(directory_videos, f"/videos/output{index}.mp4")])
+
+	
 	def download_visuals(self) -> None:
 		"""
 		Download videos in parallel and images sequentially.
@@ -118,8 +198,9 @@ class VideoDownloader:
 		"""
 		self.get_query()
 		
-		# Use descriptive variables instead of a list
-		video_urls = self.get_video_urls()
+		# Get Twitter and Pinterest Videos and Images
+		self.get_video_urls_pinterest()
+		video_urls = self.get_video_urls_twitter()
 		image_urls = self.get_image_urls()
 		
 		# Create directories

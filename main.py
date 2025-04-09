@@ -210,7 +210,7 @@ def main() -> None:
 		
 		# Call the upload_to_youtube functions that automatically uploads the video as you like
 		try:
-			uploader = YoutubeUploader(main_org._path + "/uploads", [sys.argv[3], sys.argv[4]])
+			uploader = YoutubeUploader(main_org._path + "/upload", [sys.argv[3], sys.argv[4]], main_org._path + "/script/script_german.txt")
 			uploader.upload_to_youtube
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)

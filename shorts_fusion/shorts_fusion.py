@@ -263,15 +263,3 @@ class ShortFusion:
 		print(Fore.GREEN + "\nStarting putting video and audio together to the upload it..." + Style.RESET_ALL)
 		self.fusion_visuals_and_audio(video, audio)
 		print(Fore.GREEN + "\nFinished the fusion, next step will be uploading." + Style.RESET_ALL)
-
-def main() -> None:
-	fusion = ShortFusion("~/Documents/technews")
-	fusion.orchestrate_fusion()
-
-if __name__ == "__main__":
-	main()
-
-# geschnittene videos und bilder entsprechend drueber legen,
-# zwischen videos und bildern auch immer eine entsprechende ueberleitung
-# und dann noch subtitles die ich im .srt format habe einspielen mit entsprechenden effekten.
-# das alles dann als mp4 verpacken und in ein entsprechenden ordner verschieben

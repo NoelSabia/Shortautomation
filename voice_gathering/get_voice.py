@@ -41,8 +41,8 @@ class VoiceCaller:
 			raise ValueError(Fore.RED + "Eleven Labs API key not found. Please set the ELEVEN_LABS_API_X environment variables." + Style.RESET_ALL)
 
 		# Cycle trough all the keys and try each one of them until one works (needed if you only use the free api keys)
-		failed_api_keys = 0
 		for script, output_path in zip(self._script_to_voices, self._output_paths):
+			failed_api_keys = 0
 			with open(os.path.expanduser(script), "r") as file:
 				file_content = file.read()
 			for api_key in valid_api_keys:

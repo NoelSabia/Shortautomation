@@ -15,7 +15,7 @@ class GPTCaller:
 		self._rewritten_text = None
 			
 
-	def rewrite(self, scraped_str: str) -> None:
+	def rewrite(self, scraped_str: str) -> list[str]:
 		"""
 		Rewrite the scraped text so that you can use it as your script
 		:param scraped_str: The scraped text
@@ -26,7 +26,7 @@ class GPTCaller:
 		# loop trough the list of path and language at the same time
 		for i, (path, language) in enumerate(zip(self._default_paths, self._languages), start=1):
 			expanded_output_path = os.path.expanduser(path)
-			print(Fore.GREEN + f"\nGenerating script {i} of {len(self._default_paths)}." + Style.RESET_ALL)
+			print(Fore.GREEN + f"\nGenerating script {i + 1} of {len(self._default_paths)}." + Style.RESET_ALL)
 			
 			#generate the script
 			while True:

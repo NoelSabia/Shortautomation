@@ -91,6 +91,7 @@ For that install:
 12. Go to "Audience" and click on "Add Users" and add your mail
 13. Go to "Clients" click on "Create Client" and select "Web Application"
 14. Create URI1 and URI2 with http://localhost:8080/ and http://localhost:8080/oauth2callback and click on create
+15. For the second lanuage (german in this case) do the same as in step 14 but with port 8081
 15. Now Download the JSON and your ready to go
 
 
