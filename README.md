@@ -1,6 +1,7 @@
 # Shortautomation
 
 A command-line program that streamlines creating short videos, shorts for YouTube, TikTok or Instagram.
+Cost per fully automated video: 0,30 Euro, every other language is free so for german and english the cost per video is 30 cents / 2 videos = 15 cent per video
 
 ## Table of Contents
 - [Preflight Check List](#preflight-check-list)
@@ -37,8 +38,6 @@ A command-line program that streamlines creating short videos, shorts for YouTub
    source .venv/bin/activate
    ```
 
-
-
 ### How and What to Install via pip
 1. Ensure you’re in the virtual environment.  
 2. Install dependencies and ffmpeg on your system:  
@@ -55,25 +54,26 @@ For that install:
 ```bash
    sudo apt install wmctrl feh mpv ffmpeg -y
 
-   #Then inside of the project Shortautomization in subtitles_gathering clone openai-whisper with http or ssh
+   # Then inside of the project Shortautomization in subtitles_gathering clone openai-whisper with http or ssh
    cd subtitles_gathering
 
-   #ssh
+   # ssh
    git clone org-14957082@github.com:openai/whisper.git
 
-   #http
-   git clone https://github.com/openai/whisper.git
+   # alternative with http
+   # git clone https://github.com/openai/whisper.git
 ```
 
 ### API Keys and How to Get Them
-1. Sign up for the necessary APIs (Eleven Labs, OpenAI).  
+1. Sign up for the necessary APIs (Eleven Labs, OpenAI, StabilityAI).  
 2. Add the keys to your .env file:
    ```
    OPENAI_API_KEY=your_openai_key
    ELEVEN_LABS_API_X=your_elevenlabs_key
+   STABLE_DIFFUSION_API_KEY=your_stabilityai_key
    ```
 > [!TIP]
-> You can use a 10-min-mail to create endless free eleven labs api-keys. The more the better. 😉
+> You can use a 10-min-mail to create endless free eleven labs api-keys. Currently limited to 5 eleven labs api-keys. 😉
 
 
 ### How to get the JSONs to autoupload youtube shorts
@@ -95,17 +95,8 @@ For that install:
 15. Now Download the JSON and your ready to go
 
 
-## How to Use This Command-Line Program
-1. Activate your virtual environment.
-2. Run Python scripts from the terminal, for example:  
-   ```bash
-   python3 main.py <directory of where to write the output> <from here on only args are websites to scrape> ...
-   ```
-3. Follow the prompts.
-
-
 ## How to Use the Master Command-Line Program
-1. Activate your virtual environment.
+1. [Activate your virtual environment](#how-to-set-up-a-virtual-environment)
 2. Change the file program_args.txt [accordingly](#how-to-change-the-program-args-file-correctly) or leave the default values.
 3. Run Python scripts from the terminal, for example:  
    ```bash
@@ -125,6 +116,21 @@ The program_args.txt file has blocks that will have one directory of where to sa
 4. youtube_english=<value in form of a str> -> this key-pair value is for uploads to the english channel
 5. website=<value in form of a str> -> this key-pair value gives the website to scrape. You can have as many website key-value pairs as you like
 
+Example:
+```bash
+dir="~/Documents/Shortautomization1"
+browser="leave_empty"
+youtube1="json_to_validate"
+youtube2="json_to_validate"
+website="https://techcrunch.com/"
+
+dir="~/Documents/Shortautomization2"
+browser="leave_empty"
+youtube1="json_to_validate"
+youtube2="json_to_validate"
+website="https://otherwebsite.com/"
+```
+
 > [!IMPORTANT]
 > The only problem is that if you don't use the default websites you have to write your own python code to scrape.
 
@@ -133,10 +139,8 @@ The program_args.txt file has blocks that will have one directory of where to sa
 - Geschichte (deutsch)
 - Politik (deutsch)
 - Reiseziele und Kulturen (deutsch)
-- Tierfakten (deutsch) (not yet integrated)
 ---
 - Technews (englisch)
 - History (englisch)
 - Politics (englisch)
 - Traveltargets and cultures (englisch)
-- Animalfacts (englisch) (not yet integrated)
