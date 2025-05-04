@@ -1,5 +1,5 @@
 dir="~/Documents/technews"
 browser="firefox"
 youtube1="ShortautomizationNews_german.json"
-youtube2="ShortautomizationNews_english.json
+youtube2="ShortautomizationNews_english.json"
 website="https://techcrunch.com/"

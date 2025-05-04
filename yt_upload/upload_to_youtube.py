@@ -30,7 +30,7 @@ class YoutubeUploader:
         Authenticate on youtube with google acc
         """
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            os.path.join(pathlib.Path().resolve() / "youtube_jsons" / client_json_path),
+            os.path.join(pathlib.Path().resolve() / "yt_upload/youtube_jsons" / client_json_path),
             scopes=["https://www.googleapis.com/auth/youtube.upload"]
         )
         flow.redirect_uri = "http://localhost:" + str(port_input) + "/"

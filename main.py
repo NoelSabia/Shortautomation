@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 import sys
 import time
+import asyncio
 
 # What the color codes mean:
 # WHITE: user input needed
@@ -192,8 +193,7 @@ def main() -> None:
 		# Call the get_cc_vids function
 		try:
 			visual = VideoDownloader([main_org._path + "/visuals", main_org._path] , paths_to_scripts[1])
-			visual.download_visuals()
-			visual.select_visuals()
+			asyncio.run(visual.orchastrate_image_getting())
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)
@@ -210,8 +210,8 @@ def main() -> None:
 		
 		# Call the upload_to_youtube functions that automatically uploads the video as you like
 		try:
-			uploader = YoutubeUploader(main_org._path + "/upload", [sys.argv[3], sys.argv[4]], main_org._path + "/script/script_german.txt")
-			uploader.upload_to_youtube
+			uploader = YoutubeUploader(main_org._path + "/upload", [sys.argv[3], sys.argv[4]], main_org._path + "/script/script_english.txt")
+			uploader.upload_to_youtube()
 		except Exception as e:
 			print(Fore.RED + f"\n{e}\n" + Style.RESET_ALL)
 			main_org.check_if_error_exit(None)

@@ -34,7 +34,7 @@ class SubtitleGenerator:
                     full_input_path,
                     "--model", "small",
                     "--language", language,
-                    "--device", "cpu",
+                    "--device", "cuda",
                     "--output_dir", full_output_dir,
                     "--output_format", "srt",
                     # Settings to create shorter segments:

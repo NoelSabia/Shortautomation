@@ -68,7 +68,7 @@ class VoiceCaller:
 						failed_api_keys += 1
 						continue
 					elif e.status_code == 401:
-						print(Fore.YELLOW + f"\nThe API key {api_key} is not authorized. No urgent action needed, fallback to other API keys!" + Style.RESET_ALL)
+						print(Fore.YELLOW + f"\nThe API key {api_key} is exhausted. No urgent action needed, fallback to other API keys!" + Style.RESET_ALL)
 						failed_api_keys += 1
 						continue
 					elif e.status_code == 422:
